@@ -3,10 +3,9 @@
 **Browser-based PID controller tuning tool.**  
 One HTML file — offline, no dependencies, no backend.
 
-GitHub : [https://github.com/DarkenAmber/electrokit](https://github.com/DarkenAmber/PIDToolkit)
-
 PIDToolkit: [https://darkenamber.github.io/electrokit/](https://darkenamber.github.io/PIDToolkit/)
 
+GitHub : [https://github.com/DarkenAmber/electrokit](https://github.com/DarkenAmber/PIDToolkit)
 ![DarkenAmber](https://img.shields.io/badge/style-DarkenAmber-E8A020)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Version](https://img.shields.io/badge/version-1.0-blue)
