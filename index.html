@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PID Toolkit — DarkenAmber</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #0D0820;
+  --bg2:    #130A2C;
+  --card:   #1A0E38;
+  --border: #3A1A60;
+  --acc:    #E8A020;
+  --acc2:   #C07810;
+  --text:   #D0C0E8;
+  --muted:  #7060A0;
+  --green:  #30D068;
+  --red:    #E03060;
+  --cyan:   #20C0D0;
+  --purple: #A060E0;
+  --blue:   #4090E0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Space Mono',monospace}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;background:#0A0618;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.hdr-brand{display:flex;align-items:baseline;gap:10px}
+.hdr-logo{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;color:var(--acc);letter-spacing:1px}
+.hdr-logo span{color:var(--text);font-weight:400}
+.hdr-sub{font-family:'Space Mono',monospace;font-size:13px;color:var(--acc)}
+.badge{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:3px;padding:2px 6px}
+.hdr-btns{display:flex;gap:6px}
+.btn{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:border-color .15s}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn-sm{padding:4px 10px;font-size:11px}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:265px 1fr;height:calc(100vh - 48px)}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:14px 14px 20px}
+.main{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+
+/* SIDEBAR */
+.s-title{font-size:10px;font-family:'Space Mono',monospace;color:var(--acc);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.s-sec{margin-bottom:18px}
+.field{margin-bottom:9px}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px;font-family:'Space Mono',monospace}
+.field input,.field select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:7px 10px;font-size:13px;font-family:'Space Mono',monospace}
+.field input:focus,.field select:focus{outline:none;border-color:var(--acc)}
+.field select option{background:var(--bg2)}
+.field-hint{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+/* mode toggle */
+.mode-toggle{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:14px}
+.mode-btn{padding:7px 4px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:10px;font-family:'Space Mono',monospace;cursor:pointer;text-align:center;transition:.15s;line-height:1.4}
+.mode-btn.active{background:var(--card);border-color:var(--acc);color:var(--acc)}
+
+/* method pills */
+.m-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:4px}
+.m-pill{padding:7px 2px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--muted);font-size:10px;font-family:'Space Mono',monospace;text-align:center;cursor:pointer;transition:.15s;line-height:1.4}
+.m-pill:hover{border-color:var(--purple);color:var(--purple)}
+.m-pill.active{background:var(--card);border-color:var(--acc);color:var(--acc)}
+
+/* slider */
+.slider-wrap{display:flex;align-items:center;gap:8px;margin-top:4px}
+.slider-wrap input[type=range]{flex:1;accent-color:var(--acc);height:3px}
+.slider-val{font-family:'Space Mono',monospace;font-size:13px;color:var(--acc);min-width:38px;text-align:right}
+
+/* ratio pill */
+.ratio-block{margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.8;display:none}
+.ratio-block span{color:var(--acc)}
+
+.btn-calc{width:100%;padding:12px;background:var(--acc);border:none;border-radius:6px;color:#000;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;cursor:pointer;margin-top:6px;letter-spacing:.5px;transition:background .15s}
+.btn-calc:hover{background:var(--acc2)}
+@keyframes pulse-calc{
+  0%,100%{box-shadow:0 0 0 0 rgba(232,160,32,0.5)}
+  50%{box-shadow:0 0 0 8px rgba(232,160,32,0)}
+}
+.btn-calc-dirty{animation:pulse-calc 1.4s ease-in-out infinite;background:var(--acc2)}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px 14px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:8px 8px 0 0}
+.kpi-kp::after{background:var(--acc)}
+.kpi-ki::after{background:var(--cyan)}
+.kpi-kd::after{background:var(--purple)}
+.kpi-os::after{background:var(--green)}
+.kpi-ts::after{background:var(--blue)}
+.kpi-label{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px}
+.kpi-value{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;line-height:1}
+.kpi-unit{font-size:10px;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace}
+.kpi-kp .kpi-value{color:var(--acc)}
+.kpi-ki .kpi-value{color:var(--cyan)}
+.kpi-kd .kpi-value{color:var(--purple)}
+.kpi-os .kpi-value{color:var(--green)}
+.kpi-ts .kpi-value{color:var(--blue)}
+
+/* GRAPH */
+.graph-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.graph-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.graph-title{font-family:'Space Mono',monospace;font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:.5px}
+.graph-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-family:'Space Mono',monospace}
+.leg-line{width:18px;height:2px;border-radius:1px}
+canvas#graph,canvas#bode-cv{display:block;width:100%;border-radius:5px;background:#080514}
+
+/* GRAPH VIEW TABS */
+.view-tabs{display:flex;gap:4px;margin-bottom:8px}
+.view-tab{padding:4px 12px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;cursor:pointer;transition:.15s}
+.view-tab.active{border-color:var(--acc);color:var(--acc);background:var(--card)}
+
+/* MOBILE */
+@media(max-width:860px){
+  .layout{grid-template-columns:1fr;height:auto}
+  .sidebar{border-right:none;border-bottom:1px solid var(--border);max-height:60vh;overflow-y:auto}
+  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .kpi-value{font-size:16px}
+  .comp-tbl-wrap{overflow-x:auto}
+  .code-hdr{flex-wrap:wrap}
+  .lang-tabs{flex-wrap:wrap}
+  .hdr-sub{display:none}
+}
+
+/* stability */
+.stab-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:'Space Mono',monospace;border-radius:4px;padding:3px 8px;border:1px solid}
+.stab-ok{color:var(--green);border-color:#1A5030;background:#081A10}
+.stab-warn{color:var(--acc);border-color:#504010;background:#181000}
+.stab-err{color:var(--red);border-color:#501030;background:#180410}
+
+/* COMPARISON */
+.comp-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.card-title{font-family:'Space Mono',monospace;font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.comp-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.comp-tbl th{background:var(--bg2);color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.comp-tbl th:not(:first-child){text-align:right}
+.comp-tbl td{padding:7px 10px;border-bottom:1px solid #160C28;font-family:'Space Mono',monospace}
+.comp-tbl td:not(:first-child){text-align:right}
+.comp-tbl tr:last-child td{border-bottom:none}
+.comp-tbl tr.act td{background:#1E1040}
+.comp-tbl tr:not(.act):hover td{background:#150B2A;cursor:pointer}
+.c-kp{color:var(--acc)}
+.c-ki{color:var(--cyan)}
+.c-kd{color:var(--purple)}
+.c-os-ok{color:var(--green)}
+.c-os-warn{color:var(--acc)}
+.c-os-bad{color:var(--red)}
+
+/* CODE */
+.code-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.code-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.lang-tabs{display:flex;gap:4px}
+.lang-tab{padding:4px 11px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;cursor:pointer;transition:.15s}
+.lang-tab.active{border-color:var(--acc);color:var(--acc);background:var(--card)}
+.lang-tab:hover:not(.active){border-color:var(--muted);color:var(--text)}
+pre#code-out{background:#080514;border-radius:6px;padding:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text);overflow-x:auto;line-height:1.7;border:1px solid #1A0A30;max-height:320px;overflow-y:auto}
+.kw{color:#A060E0}
+.cm{color:#504070;font-style:italic}
+.nm{color:var(--cyan)}
+.st{color:var(--green)}
+.nb{color:var(--acc)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* SORT */
+.sort-th { cursor:pointer; user-select:none; }
+.sort-th:hover { color:var(--acc); }
+.sort-icon { opacity:.5; font-size:9px; margin-left:3px; }
+
+/* PRINT */
+@media print {
+  .sidebar, .view-tabs, .code-card, #view-bode,
+  .hdr-btns, .badge, .hdr-sub { display:none !important; }
+  .layout { display:block !important; height:auto !important; }
+  .main { padding:0 !important; gap:10px !important; }
+  .hdr { padding:8px 12px; border-bottom:1px solid #ccc; background:#fff; }
+  .hdr-logo, .hdr-sub-print { color:#000 !important; }
+  body { background:#fff !important; color:#000 !important; }
+  .card, .comp-card, .graph-card, .kpi { background:#fff !important; border:1px solid #ccc !important; }
+  .kpi-value { color:#000 !important; }
+  .kpi-label, .kpi-unit { color:#555 !important; }
+  canvas#graph { width:100% !important; background:#fff !important; }
+  .comp-tbl th { background:#f0f0f0 !important; color:#555 !important; }
+  .comp-tbl td { border-bottom:1px solid #ddd !important; color:#000 !important; }
+  .comp-tbl tr.act td { background:#f5f0ff !important; }
+  .no-print-el { display:none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">
+    <span class="hdr-logo">Darken<span>·</span>Amber</span>
+    <span class="hdr-sub">/ PID Toolkit</span>
+    <span class="badge">FOPDT · v1.0</span>
+  </div>
+  <div class="hdr-btns">
+    <select id="ui-lang-sel" onchange="setUILang(this.value)" style="background:var(--card);border:1px solid var(--border);color:var(--acc);border-radius:5px;padding:5px 10px;font-size:12px;font-family:'Space Mono',monospace;cursor:pointer">
+      <option value="en" selected>EN</option>
+      <option value="ru">RU</option>
+    </select>
+    <button class="btn btn-sm" onclick="shareURL(this)">⤴ Share</button>
+    <button class="btn btn-sm" onclick="doPrint()">⎙ PDF</button>
+    <button class="btn btn-sm" onclick="importJSON()">↑ Import</button>
+    <button class="btn btn-sm" onclick="exportJSON()">↓ Export</button>
+    <div style="display:flex;gap:4px;margin-left:4px;padding-left:8px;border-left:1px solid var(--border)">
+      <a href="https://github.com/DarkenAmber" target="_blank" class="btn btn-sm" title="GitHub" style="text-decoration:none">🐙</a>
+      <a href="https://www.patreon.com/cw/DarkenAmber" target="_blank" class="btn btn-sm" title="Patreon" style="text-decoration:none">❤️</a>
+      <a href="https://ko-fi.com/darkenamber" target="_blank" class="btn btn-sm" title="Ko-fi" style="text-decoration:none">☕</a>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <div class="s-sec">
+      <div class="s-title" data-i18n="presets">Quick Presets</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <button class="btn btn-sm" style="font-size:11px" onclick="loadPreset('temp')">🌡 <span data-i18n="preset-temp">Temperature</span></button>
+        <button class="btn btn-sm" style="font-size:11px" onclick="loadPreset('pressure')">⚡ <span data-i18n="preset-pressure">Pressure</span></button>
+        <button class="btn btn-sm" style="font-size:11px" onclick="loadPreset('level')">💧 <span data-i18n="preset-level">Level</span></button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin:6px 0 4px;font-family:'Space Mono',monospace" data-i18n="preset-motor-group">⚙ Motor</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <button class="btn btn-sm" style="font-size:10px" onclick="loadPreset('motor_speed')" title="K=2.0 T=0.5s L=0.05s"><span data-i18n="preset-motor-speed">DC Speed</span></button>
+        <button class="btn btn-sm" style="font-size:10px" onclick="loadPreset('motor_pos')"   title="K=1.0 T=0.8s L=0.1s"><span data-i18n="preset-motor-pos">DC Position</span></button>
+        <button class="btn btn-sm" style="font-size:10px" onclick="loadPreset('servo')"       title="K=1.5 T=0.2s L=0.02s"><span data-i18n="preset-servo">Servo</span></button>
+        <button class="btn btn-sm" style="font-size:10px" onclick="loadPreset('conveyor')"    title="K=0.5 T=2.0s L=0.3s"><span data-i18n="preset-conveyor">Conveyor</span></button>
+      </div>
+    </div>
+
+    <div class="s-sec">
+      <div class="s-title" data-i18n="input-mode">Input Mode</div>
+      <div class="mode-toggle">
+        <div class="mode-btn active" id="mode-fopdt" onclick="setMode('fopdt')">FOPDT<br><span style="font-size:9px;opacity:.6">K · T · L</span></div>
+        <div class="mode-btn" id="mode-ultimate" onclick="setMode('ultimate')">Ultimate<br><span style="font-size:9px;opacity:.6">Ku · Tu</span></div>
+      </div>
+    </div>
+
+    <div class="s-sec" id="panel-fopdt">
+      <div class="s-title" data-i18n="plant-model">Plant Model</div>
+      <div class="field">
+        <label data-i18n="k-label">K — Process Gain</label>
+        <input type="number" id="in-K" value="1.0" step="0.1" min="0.001" oninput="onLiveInput()">
+        <div class="field-hint" data-i18n="k-hint">Steady-state output/input ratio</div>
+      </div>
+      <div class="field">
+        <label data-i18n="T-label">T — Time Constant, s</label>
+        <input type="number" id="in-T" value="10" step="0.5" min="0.1" oninput="onLiveInput()">
+        <div class="field-hint" data-i18n="T-hint">Time to reach 63% of steady-state</div>
+      </div>
+      <div class="field">
+        <label data-i18n="L-label">L — Dead Time, s</label>
+        <input type="number" id="in-L" value="2" step="0.1" min="0" oninput="onLiveInput()">
+        <div class="field-hint" data-i18n="L-hint">Transport delay of the plant</div>
+      </div>
+    </div>
+
+    <div class="s-sec" id="panel-ultimate" style="display:none">
+      <div class="s-title" data-i18n="ultimate-params">Ultimate Parameters</div>
+      <div class="field">
+        <label data-i18n="ku-label">Ku — Ultimate Gain</label>
+        <input type="number" id="in-Ku" value="5.0" step="0.1" min="0.01" oninput="onLiveInput()">
+      </div>
+      <div class="field">
+        <label data-i18n="tu-label">Tu — Ultimate Period, s</label>
+        <input type="number" id="in-Tu" value="8.0" step="0.1" min="0.01" oninput="onLiveInput()">
+      </div>
+      <div style="margin-top:10px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:5px;font-size:10px;color:var(--muted);line-height:1.5" data-i18n="ultimate-note">
+        For step response simulation, also fill FOPDT parameters above.
+      </div>
+    </div>
+
+    <div class="s-sec">
+      <div class="s-title" data-i18n="tuning-method">Tuning Method</div>
+      <div class="m-grid">
+        <div class="m-pill active" id="pill-znol"   onclick="setMethod('znol')">Z-N<br>OL</div>
+        <div class="m-pill"        id="pill-zncl"   onclick="setMethod('zncl')">Z-N<br>CL</div>
+        <div class="m-pill"        id="pill-chr0"   onclick="setMethod('chr0')">CHR<br>0%</div>
+        <div class="m-pill"        id="pill-chr20"  onclick="setMethod('chr20')">CHR<br>20%</div>
+        <div class="m-pill"        id="pill-itae"   onclick="setMethod('itae')">ITAE</div>
+        <div class="m-pill"        id="pill-lambda" onclick="setMethod('lambda')">λ IMC</div>
+      </div>
+
+      <div id="lambda-block" style="display:none;margin-top:10px">
+        <div class="field">
+          <label>λ — closed-loop time constant</label>
+          <div class="slider-wrap">
+            <input type="range" id="lambda-sl" min="0.5" max="30" step="0.5" value="4" oninput="onLambda(this.value)">
+            <span class="slider-val" id="lambda-v">4.0 s</span>
+          </div>
+          <div class="field-hint">Recommended: 2L – 4L ≈ <span id="lambda-hint" style="color:var(--acc)">4–8 s</span></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;font-size:12px">
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:var(--text)">
+            <input type="radio" name="lambda-type" value="pi" checked style="accent-color:var(--acc)"> PI
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:var(--text)">
+            <input type="radio" name="lambda-type" value="pid" style="accent-color:var(--acc)"> PID
+          </label>
+        </div>
+      </div>
+
+      <div id="itae-block" style="display:none;margin-top:10px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:'Space Mono',monospace">ITAE optimization for:</div>
+        <div style="display:flex;gap:12px;font-size:12px">
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:var(--text)">
+            <input type="radio" name="itae-type" value="servo" checked style="accent-color:var(--acc)"> Setpoint
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:var(--text)">
+            <input type="radio" name="itae-type" value="regulator" style="accent-color:var(--acc)"> Disturbance
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="s-sec">
+      <div class="s-title" data-i18n="ctrl-type">Controller Type</div>
+      <div style="display:flex;gap:12px;font-size:12px">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:var(--text)">
+          <input type="radio" name="ctrl-type" value="p" style="accent-color:var(--acc)"> P
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:var(--text)">
+          <input type="radio" name="ctrl-type" value="pi" style="accent-color:var(--acc)"> PI
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:var(--text)">
+          <input type="radio" name="ctrl-type" value="pid" checked style="accent-color:var(--acc)"> PID
+        </label>
+      </div>
+    </div>
+
+    <div class="s-sec">
+      <div class="s-title" data-i18n="out-limits">Output Limits</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="field" style="margin-bottom:0">
+          <label data-i18n="out-min">Min</label>
+          <input type="number" id="out-min" value="0" step="1">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label data-i18n="out-max">Max</label>
+          <input type="number" id="out-max" value="100" step="1">
+        </div>
+      </div>
+    </div>
+
+      <!-- D-FILTER OPTION -->
+      <div class="s-sec">
+        <div class="s-title" data-i18n="d-filter-title">D-Term Filter</div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:var(--text)">
+          <input type="checkbox" id="d-filter" style="accent-color:var(--acc)">
+          <span data-i18n="d-filter-label">Enable filter (Tf = Td / N)</span>
+        </label>
+        <div id="d-filter-n" style="display:none;margin-top:8px">
+          <div class="field" style="margin-bottom:0">
+            <label>N — filter coefficient</label>
+            <input type="number" id="d-filter-N" value="10" min="2" max="50" step="1">
+            <div class="field-hint">Typical: 5–20. Higher = less filtering</div>
+          </div>
+        </div>
+      </div>
+
+    <button class="btn-calc" onclick="calculate()" data-i18n="btn-calc">▶ CALCULATE</button>
+
+    <div style="margin-top:10px;font-size:10px;color:var(--muted);line-height:1.6;font-family:'Space Mono',monospace" data-i18n="disclaimer">
+      ⚠ Results based on ideal FOPDT model. Verify on real plant.
+    </div>
+
+    <div class="ratio-block" id="ratio-block">
+      L/T = <span id="r-lt">—</span> · <span id="r-mode" style="color:var(--text)">—</span><br>
+      <span id="r-hint" style="font-size:9px;color:var(--muted);line-height:1.5">—</span>
+    </div>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi kpi-kp"><div class="kpi-label">Kp</div><div class="kpi-value" id="v-kp">—</div><div class="kpi-unit" data-i18n="kpi-kp-unit">proportional</div></div>
+      <div class="kpi kpi-ki"><div class="kpi-label">Ki</div><div class="kpi-value" id="v-ki">—</div><div class="kpi-unit" data-i18n="kpi-ki-unit">integral</div></div>
+      <div class="kpi kpi-kd"><div class="kpi-label">Kd</div><div class="kpi-value" id="v-kd">—</div><div class="kpi-unit" data-i18n="kpi-kd-unit">derivative</div></div>
+      <div class="kpi kpi-os"><div class="kpi-label" data-i18n="kpi-os">Overshoot</div><div class="kpi-value" id="v-os">—</div><div class="kpi-unit">%</div></div>
+      <div class="kpi kpi-ts"><div class="kpi-label" data-i18n="kpi-ts">Settling</div><div class="kpi-value" id="v-ts">—</div><div class="kpi-unit" data-i18n="kpi-ts-unit">seconds (±5%)</div></div>
+    </div>
+
+    <!-- VIEW TABS -->
+    <!-- WARNINGS -->
+    <div id="pid-warnings" style="margin-bottom:8px"></div>
+
+    <div class="view-tabs">
+      <div class="view-tab active" id="vtab-step" onclick="switchView('step')" data-i18n="step-title">Step Response</div>
+      <div class="view-tab" id="vtab-bode" onclick="switchView('bode')" data-i18n="bode-tab">Bode Plot</div>
+    </div>
+
+    <!-- STEP RESPONSE -->
+    <div id="view-step">
+      <div class="graph-card">
+        <div class="graph-hdr">
+          <div class="graph-title" data-i18n="step-title">Step Response</div>
+          <div class="graph-meta">
+            <div class="leg-item"><div class="leg-line" style="background:var(--cyan);border-top:1px dashed var(--cyan)"></div><span data-i18n="legend-sp">Setpoint</span></div>
+            <div class="leg-item"><div class="leg-line" style="background:var(--acc)"></div><span data-i18n="legend-resp">Response</span></div>
+            <div id="stab-el"></div>
+            <button class="btn btn-sm" onclick="savePNG('graph','step-response')">⬇ PNG</button>
+          </div>
+        </div>
+        <canvas id="graph" height="280"></canvas>
+      </div>
+    </div>
+
+    <!-- BODE PLOT -->
+    <div id="view-bode" style="display:none">
+      <div class="graph-card">
+        <div class="graph-hdr">
+          <div class="graph-title" data-i18n="bode-title">Bode Plot — Open Loop</div>
+          <div class="graph-meta">
+            <div id="bode-pm" style="font-size:11px;font-family:'Space Mono',monospace;color:var(--green)"></div>
+            <div id="bode-gm" style="font-size:11px;font-family:'Space Mono',monospace;color:var(--cyan)"></div>
+            <button class="btn btn-sm" onclick="savePNG('bode-cv','bode-plot')">⬇ PNG</button>
+          </div>
+        </div>
+        <canvas id="bode-cv" height="340"></canvas>
+      </div>
+    </div>
+
+    <!-- COMPARISON -->
+    <div class="comp-card">
+      <div class="card-title" data-i18n="comp-title">Method Comparison</div>
+      <div class="comp-tbl-wrap">
+      <table class="comp-tbl">
+        <thead><tr>
+          <th data-i18n="col-method">Method</th>
+          <th class="sort-th" onclick="sortTable('kp')">Kp<span class="sort-icon" id="si-kp">↕</span></th>
+          <th class="sort-th" onclick="sortTable('ki')">Ki<span class="sort-icon" id="si-ki">↕</span></th>
+          <th class="sort-th" onclick="sortTable('kd')">Kd<span class="sort-icon" id="si-kd">↕</span></th>
+          <th>Ti, s</th><th>Td, s</th>
+          <th class="sort-th" onclick="sortTable('os')" data-i18n="col-os">Overshoot<span class="sort-icon" id="si-os">↕</span></th>
+        </tr></thead>
+        <tbody id="comp-body">
+          <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Press Calculate</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <!-- CODE -->
+    <div class="code-card">
+      <div class="code-hdr">
+        <div class="card-title" style="margin-bottom:0;flex:1" data-i18n="code-title">Code Export</div>
+        <div class="lang-tabs">
+          <div class="lang-tab active" id="tab-arduino"     onclick="setLang('arduino')">Arduino</div>
+          <div class="lang-tab"        id="tab-esp32"       onclick="setLang('esp32')">ESP32</div>
+          <div class="lang-tab"        id="tab-micropython" onclick="setLang('micropython')">MicroPython</div>
+          <div class="lang-tab"        id="tab-iecst"       onclick="setLang('iecst')">IEC ST</div>
+        </div>
+        <button class="btn btn-sm" onclick="copyCode(this)" style="margin-left:8px">Copy</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin:8px 0 4px;font-family:'Space Mono',monospace" data-i18n="d-term-note">
+        ⚠ D-term: derivative on measurement (no derivative kick). Add D-filter for noisy signals.
+      </div>
+      <pre id="code-out"><span style="color:var(--muted);font-style:italic">// Press Calculate to generate code</span></pre>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────
+const S = {
+  mode: 'fopdt', method: 'znol', lang: 'arduino', uiLang: 'en',
+  K: 1, T: 10, L: 2, Ku: 5, Tu: 8, lambda: 4,
+  results: null, simData: null, metrics: null,
+  simCache: {},
+  sortCol: null, sortDir: 1  // сортировка таблицы сравнения
+};
+
+const PRESETS = {
+  temp:         { K: 0.8,  T: 120,  L: 15,   label: 'Temperature (slow)' },
+  pressure:     { K: 1.2,  T: 5,    L: 0.5,  label: 'Pressure (fast)'    },
+  level:        { K: 1.0,  T: 30,   L: 3,    label: 'Level'              },
+  motor_speed:  { K: 2.0,  T: 0.5,  L: 0.05, label: 'DC Motor Speed'     },
+  motor_pos:    { K: 1.0,  T: 0.8,  L: 0.1,  label: 'DC Motor Position'  },
+  servo:        { K: 1.5,  T: 0.2,  L: 0.02, label: 'Servo'              },
+  conveyor:     { K: 0.5,  T: 2.0,  L: 0.3,  label: 'Conveyor/Geared'   },
+};
+
+function loadPreset(key) {
+  if (!key) return;
+  const p = PRESETS[key];
+  if (!p) return;
+  document.getElementById('in-K').value = p.K;
+  document.getElementById('in-T').value = p.T;
+  document.getElementById('in-L').value = p.L;
+  S.K = p.K; S.T = p.T; S.L = p.L;
+  if (S.results) onLiveInput();
+}
+
+const METHODS = {
+  znol:   { name: 'Ziegler-Nichols OL',  nameRu: 'Циглер-Никольс OL', short: 'Z-N OL'  },
+  zncl:   { name: 'Ziegler-Nichols CL',  nameRu: 'Циглер-Никольс CL', short: 'Z-N CL'  },
+  chr0:   { name: 'CHR  0% overshoot',   nameRu: 'CHR  0% перерег.',  short: 'CHR 0%'  },
+  chr20:  { name: 'CHR 20% overshoot',   nameRu: 'CHR 20% перерег.',  short: 'CHR 20%' },
+  itae:   { name: 'ITAE (setpoint)',      nameRu: 'ITAE (уставка)',    short: 'ITAE'    },
+  lambda: { name: 'Lambda / IMC',         nameRu: 'Lambda / IMC',      short: 'λ-IMC'   }
+};
+
+// Кнопка Calculate пульсирует когда параметры изменились после последнего расчёта
+function setCalcDirty() {
+  document.querySelector('.btn-calc')?.classList.add('btn-calc-dirty');
+}
+function setCalcClean() {
+  document.querySelector('.btn-calc')?.classList.remove('btn-calc-dirty');
+}
+
+function safeL(L){ return Math.max(L, 0.001); }
+
+function getCalcOpts() {
+  return {
+    lambdaType: document.querySelector('input[name="lambda-type"]:checked')?.value || 'pi',
+    itaeType:   document.querySelector('input[name="itae-type"]:checked')?.value   || 'servo',
+    ctrlType:   document.querySelector('input[name="ctrl-type"]:checked')?.value   || 'pid',
+  };
+}
+
+function calcAll(K, T, L, Ku, Tu, lam, opts = {}) {
+  const { lambdaType = 'pi', itaeType = 'servo', ctrlType = 'pid' } = opts;
+  L = safeL(L);
+  const r = L / T;
+  const res = {};
+
+  // Z-N Open Loop
+  const znKp = 1.2 * T / (K * L);
+  res.znol = { Kp: znKp, Ti: 2*L, Td: 0.5*L };
+
+  // Z-N Closed Loop — requires valid Ku > 0 and Tu > 0
+  const clKp = 0.6 * Ku;
+  if (Ku > 0 && Tu > 0 && isFinite(clKp)) {
+    res.zncl = { Kp: clKp, Ti: 0.5*Tu, Td: 0.125*Tu };
+  } else {
+    res.zncl = null;
+  }
+
+  // CHR 0% overshoot
+  res.chr0  = { Kp: 0.6  * T / (K * L), Ti: T,         Td: 0.5*L   };
+  // CHR 20% overshoot
+  res.chr20 = { Kp: 0.95 * T / (K * L), Ti: 1.357*T,   Td: 0.473*L };
+
+  // ITAE — Servo or Regulator with validity check
+  // Servo:     Ti = T/(0.796 - 0.147*r) → invalid when r >= 0.796/0.147 ≈ 5.41
+  // Regulator: Ti = T/(1.03 - 0.165*r)  → invalid when r >= 1.03/0.165  ≈ 6.24
+  const ITAE_MAX_R = itaeType === 'servo' ? 5.41 : 6.24;
+  if (r >= ITAE_MAX_R) {
+    res.itae = null; // L/T too large — formula breaks down
+  } else if (itaeType === 'regulator') {
+    const itKp = (0.584 / K) * Math.pow(r, -0.916);
+    const itTi = T / (1.03 - 0.165 * r);
+    const itTd = T * 0.328 * Math.pow(r, 0.929);
+    res.itae = { Kp: itKp, Ti: itTi, Td: itTd };
+  } else {
+    const itKp = (0.965 / K) * Math.pow(r, -0.855);
+    const itTi = T / (0.796 - 0.147 * r);
+    const itTd = T * 0.308 * Math.pow(r, 0.929);
+    res.itae = { Kp: itKp, Ti: itTi, Td: itTd };
+  }
+
+  // Lambda / IMC — PI or PID
+  const ef = Math.max(lam, 0.1 * T);
+  const lamKp = T / (K * (ef + L));
+  if (lambdaType === 'pid') {
+    res.lambda = { Kp: lamKp, Ti: T, Td: L / 2 };
+  } else {
+    res.lambda = { Kp: lamKp, Ti: T, Td: 0 };
+  }
+
+  // Derive Ki, Kd from Ti, Td for all valid results
+  for (const id of Object.keys(res)) {
+    const m = res[id];
+    if (!m) continue;
+    m.Ki = m.Ti > 0 ? m.Kp / m.Ti : 0;
+    m.Kd = m.Kp * m.Td;
+  }
+
+  // Apply controller type
+  for (const m of Object.values(res)) {
+    if (!m) continue;
+    if (ctrlType === 'p')  { m.Ki = 0; m.Kd = 0; m.Ti = 0; m.Td = 0; }
+    if (ctrlType === 'pi') { m.Kd = 0; m.Td = 0; }
+  }
+
+  return res;
+}
+
+// ── SIMULATION ────────────────────────────────────────────────────
+function simulate(K, T, L, Kp, Ki, Kd) {
+  // Use output limits from UI, normalised to simulation scale
+  const outMin_u = parseFloat(document.getElementById('out-min')?.value);
+  const outMax_u = parseFloat(document.getElementById('out-max')?.value);
+  const hasLimits = !isNaN(outMin_u) && !isNaN(outMax_u) && outMax_u > outMin_u;
+  const uSS = 1.0 / Math.max(K, 0.0001);
+  const uMin = hasLimits ? (outMin_u / (outMax_u || 100)) * uSS * 4 : -uSS * 4;
+  const uMax = hasLimits ? (outMax_u / (outMax_u || 100)) * uSS * 4 :  uSS * 4;
+
+  const Ts = Math.min(T / 120, L > 0.01 ? L / 8 : 0.1, 0.5);
+  const N  = Math.min(4000, Math.ceil((10 * T + 6 * L) / Ts));
+  const delay = Math.round(safeL(L) / Ts);
+  const a = Math.exp(-Ts / T), b = K * (1 - a);
+
+  const y = new Float32Array(N);
+  const ub = new Float32Array(N + delay + 2);
+  let intg = 0;
+
+  for (let k = 1; k < N; k++) {
+    const e = 1 - y[k-1];
+    // Derivative on measurement (not error) — avoids derivative kick on setpoint step
+    const deriv = (Kd > 0 && k > 1) ? -(y[k-1] - y[k-2]) / Ts : 0;
+
+    const u_raw = Kp * e + Ki * intg + Kd * deriv;
+    const u = Math.max(uMin, Math.min(uMax, u_raw));
+
+    // Conditional anti-windup: accumulate integral only when output is not saturated
+    // or when integration would reduce saturation
+    if (u_raw === u || (u_raw > uMax && e < 0) || (u_raw < uMin && e > 0)) {
+      intg += e * Ts;
+    }
+
+    ub[k] = u;
+    y[k] = a * y[k-1] + b * (k > delay ? ub[k - delay] : 0);
+  }
+  return { y, Ts, N };
+}
+
+function metrics(y, Ts) {
+  const N = y.length;
+  let mx = 0, t10 = -1, t90 = -1, sk = N - 1;
+  for (let k = 0; k < N; k++) {
+    if (y[k] > mx) mx = y[k];
+    if (t10 < 0 && y[k] >= 0.1) t10 = k * Ts;
+    if (t90 < 0 && y[k] >= 0.9) t90 = k * Ts;
+  }
+  for (let k = N-1; k >= 0; k--) { if (Math.abs(y[k]-1) > 0.05){ sk=k+1; break; } }
+
+  // Count setpoint crossings (oscillation indicator)
+  let crossings = 0;
+  for (let k = 1; k < N; k++) {
+    if ((y[k-1] - 1) * (y[k] - 1) < 0) crossings++;
+  }
+
+  // Decay ratio: second peak / first peak (above setpoint)
+  const peaks = [];
+  for (let k = 1; k < N-1; k++) {
+    if (y[k] > 1.001 && y[k] > y[k-1] && y[k] > y[k+1]) peaks.push(y[k] - 1);
+  }
+  const decayRatio = peaks.length >= 2 ? peaks[1] / peaks[0] : 0;
+
+  // Unstable: diverging, sustained oscillations, or non-converging
+  const unstable = mx > 3 || y[N-1] < -0.5 || y[N-1] > 2 ||
+                   (crossings > 8 && decayRatio > 0.85);
+
+  return {
+    os: Math.max(0, (mx - 1) * 100),
+    tr: (t10 >= 0 && t90 >= 0) ? t90 - t10 : null,
+    ts: sk * Ts,
+    sse: Math.abs(y[N-1] - 1) * 100,
+    crossings,
+    decayRatio,
+    unstable
+  };
+}
+
+// ── GRAPH ─────────────────────────────────────────────────────────
+let _animFrame = null; // текущий RAF handle для отмены
+
+function drawGraph(simData, progress) {
+  progress = (progress === undefined) ? 1 : Math.max(0, Math.min(1, progress));
+
+  const cv = document.getElementById('graph');
+  const dpr = devicePixelRatio || 1;
+  cv.width  = cv.offsetWidth * dpr;
+  cv.height = 280 * dpr;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const pd = { t:18*dpr, r:16*dpr, b:36*dpr, l:52*dpr };
+  const pw = W - pd.l - pd.r, ph = H - pd.t - pd.b;
+
+  ctx.fillStyle = '#080514';
+  ctx.fillRect(0, 0, W, H);
+
+  if (!simData) {
+    ctx.fillStyle = '#503060';
+    ctx.font = `${11*dpr}px Space Mono`;
+    ctx.textAlign = 'center';
+    ctx.fillText('Enter parameters and press Calculate', W/2, H/2);
+    return;
+  }
+
+  const { y, Ts, N } = simData;
+  let yMx = 0;
+  for (const v of y) if (v > yMx) yMx = v;
+  yMx = Math.max(1.35, yMx * 1.1);
+  const yMn = -0.08;
+  const yr = yMx - yMn;
+  const tMax = N * Ts;
+
+  // Сколько точек рисовать (для анимации)
+  const Nvis = Math.max(2, Math.floor(N * progress));
+
+  const px = (t, v) => [
+    pd.l + (t / tMax) * pw,
+    pd.t + (1 - (v - yMn) / yr) * ph
+  ];
+
+  // Grid
+  ctx.strokeStyle = '#1A0A2A';
+  ctx.lineWidth = 1;
+  for (let i=0;i<=10;i++){const x=pd.l+i/10*pw;ctx.beginPath();ctx.moveTo(x,pd.t);ctx.lineTo(x,pd.t+ph);ctx.stroke();}
+  for (let i=0;i<=6;i++){const yy=pd.t+i/6*ph;ctx.beginPath();ctx.moveTo(pd.l,yy);ctx.lineTo(pd.l+pw,yy);ctx.stroke();}
+
+  // ±5% band
+  const [,b1]=px(0,1.05), [,b2]=px(0,0.95);
+  ctx.fillStyle='rgba(32,192,208,0.04)';
+  ctx.fillRect(pd.l, b1, pw, b2-b1);
+
+  // Setpoint (пунктир появляется сразу)
+  const [sx1,sy1]=px(0,1), [sx2,sy2]=px(tMax,1);
+  ctx.strokeStyle='#20C0D0';
+  ctx.lineWidth=1.5*dpr;
+  ctx.setLineDash([6*dpr,4*dpr]);
+  ctx.beginPath();ctx.moveTo(sx1,sy1);ctx.lineTo(sx2,sy2);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Fill under curve (только до Nvis)
+  const skip = Math.max(1, Math.floor(N / (pw / dpr)));
+  ctx.beginPath();
+  ctx.moveTo(...px(0,0));
+  for(let k=0;k<Nvis;k+=skip) ctx.lineTo(...px(k*Ts,y[k]));
+  ctx.lineTo(...px((Nvis-1)*Ts, y[Nvis-1]));
+  ctx.lineTo(pd.l + (((Nvis-1)*Ts)/tMax)*pw, pd.t+ph);
+  ctx.lineTo(pd.l, pd.t+ph);
+  ctx.closePath();
+  const grad=ctx.createLinearGradient(0,pd.t,0,pd.t+ph);
+  grad.addColorStop(0,'rgba(232,160,32,0.18)');
+  grad.addColorStop(1,'rgba(160,96,224,0.03)');
+  ctx.fillStyle=grad;
+  ctx.fill();
+
+  // Response curve до Nvis
+  ctx.shadowColor='#E8A020';
+  ctx.shadowBlur=8*dpr;
+  ctx.strokeStyle='#E8A020';
+  ctx.lineWidth=2.5*dpr;
+  ctx.beginPath();
+  ctx.moveTo(...px(0,0));
+  for(let k=0;k<Nvis;k+=skip) ctx.lineTo(...px(k*Ts,y[k]));
+  ctx.lineTo(...px((Nvis-1)*Ts, y[Nvis-1]));
+  ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // Scanning dot — ползёт по кривой как луч осциллографа
+  if (progress < 1) {
+    const [scanX, scanY] = px((Nvis-1)*Ts, y[Nvis-1]);
+    ctx.fillStyle = '#FFD060';
+    ctx.shadowColor = '#FFD060';
+    ctx.shadowBlur = 14*dpr;
+    ctx.beginPath();
+    ctx.arc(scanX, scanY, 4*dpr, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  // Peak dot + σ% — только после завершения анимации
+  if (progress >= 1) {
+    let pk=0; for(let k=0;k<N;k++) if(y[k]>y[pk]) pk=k;
+    if(y[pk]>1.02){
+      const [ppx,ppy]=px(pk*Ts,y[pk]);
+      ctx.fillStyle='#E8A020';
+      ctx.shadowColor='#E8A020';
+      ctx.shadowBlur=10*dpr;
+      ctx.beginPath();ctx.arc(ppx,ppy,5*dpr,0,Math.PI*2);ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.fillStyle='#E8A020';
+      ctx.font=`${9*dpr}px Space Mono`;
+      ctx.textAlign='left';
+      ctx.fillText(`σ=${((y[pk]-1)*100).toFixed(1)}%`, ppx+7*dpr, ppy-4*dpr);
+    }
+  }
+
+  // Axes
+  ctx.strokeStyle='#3A1A60';
+  ctx.lineWidth=1.5*dpr;
+  ctx.beginPath();
+  ctx.moveTo(pd.l,pd.t);ctx.lineTo(pd.l,pd.t+ph);ctx.lineTo(pd.l+pw,pd.t+ph);
+  ctx.stroke();
+
+  // Y labels
+  ctx.fillStyle='#7060A0';
+  ctx.font=`${9*dpr}px Space Mono`;
+  ctx.textAlign='right';
+  for(let i=0;i<=4;i++){
+    const v=yMn+i/4*yr;
+    const [,yp]=px(0,v);
+    ctx.fillText(v.toFixed(1),pd.l-6*dpr,yp+3*dpr);
+  }
+  // X labels
+  ctx.textAlign='center';
+  for(let i=0;i<=5;i++){
+    const t=i/5*tMax;
+    const [xp]=px(t,0);
+    ctx.fillText(t.toFixed(0)+'s',xp,pd.t+ph+18*dpr);
+  }
+}
+
+// Анимированный запуск графика — как осциллограф разворачивает сигнал
+function animateGraph(simData) {
+  if (_animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
+  if (!simData) { drawGraph(null); return; }
+
+  const DURATION = 1500; // мс — время полной развёртки
+  const start = performance.now();
+
+  function frame(now) {
+    const elapsed = now - start;
+    const progress = Math.min(1, elapsed / DURATION);
+    // Easing: немного замедляем к концу для плавного завершения
+    const eased = progress < 1 ? progress : 1;
+    drawGraph(simData, eased);
+    if (progress < 1) {
+      _animFrame = requestAnimationFrame(frame);
+    } else {
+      _animFrame = null;
+    }
+  }
+  _animFrame = requestAnimationFrame(frame);
+}
+
+// ── CALCULATE ─────────────────────────────────────────────────────
+function calculate() {
+  setCalcClean(); // параметры приняты — убираем пульсацию
+  S.K  = parseFloat(document.getElementById('in-K').value)  || 1;
+  S.T  = parseFloat(document.getElementById('in-T').value)  || 10;
+  S.L  = parseFloat(document.getElementById('in-L').value)  || 0;
+  S.Ku = parseFloat(document.getElementById('in-Ku').value) || 5;
+  S.Tu = parseFloat(document.getElementById('in-Tu').value) || 8;
+  S.lambda = parseFloat(document.getElementById('lambda-sl').value) || 4;
+
+  const lt = (S.L / S.T);
+  renderRatioBlock(lt);
+  document.getElementById('ratio-block').style.display = 'block';
+
+  S.results = calcAll(S.K, S.T, S.L, S.Ku, S.Tu, S.lambda, getCalcOpts());
+  S.simCache = {}; // clear sim cache — separate object, no mutation of results
+
+  runSimForMethod(S.method);
+  renderCompTable();
+  updateCode();
+  checkPIDWarnings();
+  // Анимация при нажатии Calculate
+  animateGraph(S.simData);
+  // Refresh Bode if that view is active
+  const r = S.results[S.method];
+  if (r && document.getElementById('view-bode').style.display !== 'none') {
+    animateBode(S.K, S.T, S.L, r.Kp, r.Ki, r.Kd);
+  }
+  saveLS();
+}
+
+function runSimForMethod(id) {
+  const r = S.results?.[id];
+  if (!r) return;
+  S.simData = simulate(S.K, S.T, S.L, r.Kp, r.Ki, r.Kd);
+  S.metrics = metrics(S.simData.y, S.simData.Ts);
+
+  // KPI
+  const f = (v, d=3) => v == null || isNaN(v) ? '—' : v.toFixed(d);
+  document.getElementById('v-kp').textContent = f(r.Kp);
+  document.getElementById('v-ki').textContent = f(r.Ki);
+  document.getElementById('v-kd').textContent = f(r.Kd);
+  document.getElementById('v-os').textContent = S.metrics ? f(S.metrics.os, 1) : '—';
+  document.getElementById('v-ts').textContent = S.metrics ? f(S.metrics.ts, 1) : '—';
+
+  // Stability badge
+  const el = document.getElementById('stab-el');
+  if (S.metrics.unstable) el.innerHTML = '<span class="stab-badge stab-err">⛔ Unstable</span>';
+  else if (S.metrics.os > 25) el.innerHTML = `<span class="stab-badge stab-warn">⚠ Overshoot ${S.metrics.os.toFixed(1)}%</span>`;
+  else el.innerHTML = '<span class="stab-badge stab-ok">✓ Stable</span>';
+
+  drawGraph(S.simData);   // мгновенно при переключении метода из таблицы
+}
+
+function selectMethod(id) {
+  S.method = id;
+  document.querySelectorAll('.m-pill').forEach(p => p.classList.remove('active'));
+  const pill = document.getElementById('pill-' + id);
+  if (pill) pill.classList.add('active');
+  document.getElementById('lambda-block').style.display = id === 'lambda' ? 'block' : 'none';
+  if (S.results) { runSimForMethod(id); renderCompTable(); updateCode(); saveLS(); }
+}
+
+function renderCompTable() {
+  if (!S.results) return;
+  const f = (v, d=3) => v == null || isNaN(v) ? '—' : v.toFixed(d);
+  const body = document.getElementById('comp-body');
+
+  // Собрать записи
+  let entries = Object.entries(METHODS).map(([id, def]) => {
+    const r = S.results[id];
+    if (!r) return { id, def, r: null, m: null };
+    if (!S.simCache[id]) {
+      const sd = simulate(S.K, S.T, S.L, r.Kp, r.Ki, r.Kd);
+      S.simCache[id] = metrics(sd.y, sd.Ts);
+    }
+    return { id, def, r, m: S.simCache[id] };
+  });
+
+  // Сортировка
+  if (S.sortCol) {
+    const colVal = (e) => {
+      if (!e.r) return S.sortDir * Infinity;
+      if (S.sortCol === 'kp') return e.r.Kp;
+      if (S.sortCol === 'ki') return e.r.Ki;
+      if (S.sortCol === 'kd') return e.r.Kd;
+      if (S.sortCol === 'os') return e.m ? e.m.os : 999;
+      return 0;
+    };
+    entries.sort((a, b) => S.sortDir * (colVal(a) - colVal(b)));
+  }
+
+  body.innerHTML = entries.map(({ id, def, r, m }) => {
+    if (!r) return `<tr><td>${S.uiLang==='ru'?def.nameRu:def.name}</td><td colspan="6" style="color:var(--muted)">N/A${id==='itae'?' (L/T out of range)':''}</td></tr>`;
+    const osClass = m.os > 30 ? 'c-os-bad' : m.os > 15 ? 'c-os-warn' : 'c-os-ok';
+    const osText = m.unstable
+      ? '<span class="c-os-bad">✗ Unstable</span>'
+      : `<span class="${osClass}">${m.os.toFixed(1)}%</span>`;
+    const isAct = id === S.method;
+    return `<tr class="${isAct?'act':''}" onclick="selectMethod('${id}')">
+      <td>${S.uiLang==='ru'?def.nameRu:def.name}</td>
+      <td class="c-kp">${f(r.Kp)}</td>
+      <td class="c-ki">${f(r.Ki)}</td>
+      <td class="c-kd">${f(r.Kd)}</td>
+      <td>${f(r.Ti,2)}</td>
+      <td>${f(r.Td,2)}</td>
+      <td>${osText}</td>
+    </tr>`;
+  }).join('');
+}
+// ── CODE GEN ──────────────────────────────────────────────────────
+function genCode() {
+  const r = S.results?.[S.method];
+  if (!r) return '<span style="color:var(--muted);font-style:italic">// Press Calculate to generate code</span>';
+  const f = v => v.toFixed(4);
+  const mn = METHODS[S.method]?.name || '';
+  const oMin = parseFloat(document.getElementById('out-min')?.value ?? 0);
+  const oMax = parseFloat(document.getElementById('out-max')?.value ?? 100);
+  if (S.lang === 'iecst') return genIECST(r, oMin, oMax);
+
+  const dFilterOn = document.getElementById('d-filter')?.checked;
+  const dN = parseFloat(document.getElementById('d-filter-N')?.value) || 10;
+  const Tf_expr = dFilterOn ? `Kd / (Kp * ${dN}.0)` : null;
+
+  if (S.lang === 'arduino') return [
+    `<span class="cm">// PID Controller — DarkenAmber PID Toolkit</span>`,
+    `<span class="cm">// Method : ${mn}</span>`,
+    `<span class="cm">// Plant  : K=${S.K}  T=${S.T}s  L=${S.L}s</span>`,
+    `<span class="cm">// D-term : derivative on measurement${dFilterOn ? ` + low-pass filter (N=${dN})` : ''}</span>`,``,
+    `<span class="kw">const double</span> <span class="nb">Kp</span> = <span class="nm">${f(r.Kp)}</span>;`,
+    `<span class="kw">const double</span> <span class="nb">Ki</span> = <span class="nm">${f(r.Ki)}</span>;`,
+    `<span class="kw">const double</span> <span class="nb">Kd</span> = <span class="nm">${f(r.Kd)}</span>;`,
+    `<span class="kw">const double</span> OUT_MIN = <span class="nm">${oMin}</span>, OUT_MAX = <span class="nm">${oMax}</span>;`,
+    ...(dFilterOn ? [`<span class="kw">const double</span> Tf = <span class="nm">${f(r.Kd / (r.Kp * dN || 1))}</span>; <span class="cm">// Kd/(Kp*N)</span>`] : []),``,
+    `<span class="kw">double</span> setpoint = <span class="nm">0</span>, processVal = <span class="nm">0</span>, output = <span class="nm">0</span>;`,
+    `<span class="kw">double</span> integral = <span class="nm">0</span>, lastPV = <span class="nm">0</span>;`,
+    ...(dFilterOn ? [`<span class="kw">double</span> dFiltered = <span class="nm">0</span>;`] : []),
+    `<span class="kw">unsigned long</span> lastTime = <span class="nm">0</span>;`,``,
+    `<span class="kw">void</span> <span class="nm">computePID</span>() {`,
+    `  <span class="kw">unsigned long</span> now = <span class="nm">millis</span>();`,
+    `  <span class="kw">double</span> dt = (now - lastTime) / <span class="nm">1000.0</span>;`,
+    `  <span class="kw">if</span> (dt <= <span class="nm">0</span>) <span class="kw">return</span>;`,``,
+    `  <span class="kw">double</span> error = setpoint - processVal;`,
+    `  <span class="kw">double</span> dRaw = -(processVal - lastPV) / dt;`,
+    ...(dFilterOn
+      ? [`  dFiltered = (Tf * dFiltered + dt * dRaw) / (Tf + dt); <span class="cm">// 1st-order LP</span>`,
+         `  <span class="kw">double</span> dTerm = dFiltered;`]
+      : [`  <span class="kw">double</span> dTerm = dRaw;`]),``,
+    `  <span class="kw">double</span> u_raw = <span class="nb">Kp</span>*error + <span class="nb">Ki</span>*integral + <span class="nb">Kd</span>*dTerm;`,
+    `  <span class="kw">if</span> (u_raw >= OUT_MIN && u_raw <= OUT_MAX) integral += error * dt;`,``,
+    `  output = <span class="nm">constrain</span>(<span class="nb">Kp</span>*error + <span class="nb">Ki</span>*integral + <span class="nb">Kd</span>*dTerm, OUT_MIN, OUT_MAX);`,
+    `  lastPV = processVal; lastTime = now;`,
+    `}`,
+  ].join('\n');
+
+  if (S.lang === 'esp32') return [
+    `<span class="cm">// PID + FreeRTOS — ESP32 — DarkenAmber PID Toolkit</span>`,
+    `<span class="cm">// Method: ${mn}  |  D on measurement (no derivative kick)</span>`,``,
+    `<span class="kw">#include</span> <span class="st">&lt;Arduino.h&gt;</span>`,``,
+    `<span class="kw">const double</span> <span class="nb">Kp</span> = <span class="nm">${f(r.Kp)}</span>;`,
+    `<span class="kw">const double</span> <span class="nb">Ki</span> = <span class="nm">${f(r.Ki)}</span>;`,
+    `<span class="kw">const double</span> <span class="nb">Kd</span> = <span class="nm">${f(r.Kd)}</span>;`,
+    `<span class="kw">const double</span> OUT_MIN = <span class="nm">${oMin}</span>, OUT_MAX = <span class="nm">${oMax}</span>;`,
+    `<span class="kw">const</span> TickType_t SAMPLE_MS = <span class="nm">10</span>;`,``,
+    `<span class="kw">volatile double</span> setpoint = <span class="nm">0</span>, processVal = <span class="nm">0</span>, ctrlOut = <span class="nm">0</span>;`,``,
+    `<span class="kw">void</span> <span class="nm">pidTask</span>(<span class="kw">void</span>* pv) {`,
+    `  <span class="kw">double</span> intg = <span class="nm">0</span>, lastPV = <span class="nm">0</span>;`,
+    `  <span class="kw">const double</span> dt = SAMPLE_MS / <span class="nm">1000.0</span>;`,
+    `  <span class="kw">while</span>(<span class="nm">true</span>) {`,
+    `    <span class="kw">double</span> e = setpoint - processVal;`,
+    `    <span class="kw">double</span> dMeas = -(processVal - lastPV) / dt;`,
+    `    <span class="kw">double</span> u_raw = <span class="nb">Kp</span>*e + <span class="nb">Ki</span>*intg + <span class="nb">Kd</span>*dMeas;`,
+    `    <span class="kw">if</span> (u_raw >= OUT_MIN && u_raw <= OUT_MAX) intg += e * dt;`,
+    `    ctrlOut = <span class="nm">constrain</span>(<span class="nb">Kp</span>*e + <span class="nb">Ki</span>*intg + <span class="nb">Kd</span>*dMeas, OUT_MIN, OUT_MAX);`,
+    `    lastPV = processVal;`,
+    `    <span class="nm">vTaskDelay</span>(<span class="nm">pdMS_TO_TICKS</span>(SAMPLE_MS));`,
+    `  }`,
+    `}`,``,
+    `<span class="kw">void</span> <span class="nm">setup</span>() {`,
+    `  <span class="nm">xTaskCreatePinnedToCore</span>(pidTask, <span class="st">"PID"</span>, <span class="nm">2048</span>, <span class="nm">NULL</span>, <span class="nm">5</span>, <span class="nm">NULL</span>, <span class="nm">1</span>);`,
+    `}`,
+  ].join('\n');
+
+  // MicroPython
+  return [
+    `<span class="cm"># PID Controller — DarkenAmber PID Toolkit</span>`,
+    `<span class="cm"># Method: ${mn}  |  D on measurement (no derivative kick)</span>`,
+    `<span class="kw">import</span> time`,``,
+    `<span class="kw">class</span> <span class="nm">PID</span>:`,
+    `    <span class="kw">def</span> <span class="nm">__init__</span>(self, Kp, Ki, Kd, setpoint=<span class="nm">0</span>, out_min=<span class="nm">${oMin}</span>, out_max=<span class="nm">${oMax}</span>):`,
+    `        self.Kp, self.Ki, self.Kd = Kp, Ki, Kd`,
+    `        self.setpoint = setpoint`,
+    `        self.out_min, self.out_max = out_min, out_max`,
+    `        self._i, self._last_pv = <span class="nm">0</span>, <span class="nm">0</span>`,
+    `        self._lt = time.ticks_ms()`,``,
+    `    <span class="kw">def</span> <span class="nm">compute</span>(self, pv):`,
+    `        now = time.ticks_ms()`,
+    `        dt = time.ticks_diff(now, self._lt) / <span class="nm">1000</span>`,
+    `        <span class="kw">if</span> dt <= <span class="nm">0</span>: <span class="kw">return</span> <span class="nm">0</span>`,
+    `        e = self.setpoint - pv`,
+    `        d_meas = -(pv - self._last_pv) / dt  <span class="cm"># D on measurement</span>`,
+    `        u_raw = self.Kp*e + self.Ki*self._i + self.Kd*d_meas`,
+    `        <span class="kw">if</span> self.out_min <= u_raw <= self.out_max:  <span class="cm"># conditional anti-windup</span>`,
+    `            self._i += e * dt`,
+    `        out = self.Kp*e + self.Ki*self._i + self.Kd*d_meas`,
+    `        out = max(self.out_min, min(self.out_max, out))`,
+    `        self._last_pv, self._lt = pv, now`,
+    `        <span class="kw">return</span> out`,``,
+    `pid = <span class="nm">PID</span>(Kp=<span class="nb">${f(r.Kp)}</span>, Ki=<span class="nb">${f(r.Ki)}</span>, Kd=<span class="nb">${f(r.Kd)}</span>, setpoint=<span class="nm">0</span>)`,
+    `<span class="cm"># output = pid.compute(sensor_value)</span>`,
+  ].join('\n');
+}
+
+function genIECST(r, oMin = 0, oMax = 100) {
+  const f = v => v.toFixed(4);
+  const mn = METHODS[S.method]?.name || '';
+  return [
+    `<span class="cm">(* PID Controller — DarkenAmber PID Toolkit *)</span>`,
+    `<span class="cm">(* Method: ${mn}  |  D on measurement *)</span>`,
+    `<span class="cm">(* Plant:  K=${S.K}  T=${S.T}s  L=${S.L}s *)</span>`,``,
+    `<span class="kw">VAR</span>`,
+    `    <span class="nb">Kp</span>           : REAL := <span class="nm">${f(r.Kp)}</span>;`,
+    `    <span class="nb">Ki</span>           : REAL := <span class="nm">${f(r.Ki)}</span>;`,
+    `    <span class="nb">Kd</span>           : REAL := <span class="nm">${f(r.Kd)}</span>;`,
+    `    Setpoint     : REAL := <span class="nm">0.0</span>;`,
+    `    ProcessValue : REAL := <span class="nm">0.0</span>;`,
+    `    Output       : REAL := <span class="nm">0.0</span>;`,
+    `    Error        : REAL;`,
+    `    Integral     : REAL := <span class="nm">0.0</span>;`,
+    `    LastPV       : REAL := <span class="nm">0.0</span>; <span class="cm">(* D on measurement *)</span>`,
+    `    DeltaT       : REAL := <span class="nm">0.01</span>; <span class="cm">(* Sample time in seconds *)</span>`,
+    `    OutMin       : REAL := <span class="nm">${oMin}</span>;`,
+    `    OutMax       : REAL := <span class="nm">${oMax}</span>;`,
+    `    U_Raw        : REAL;`,
+    `<span class="kw">END_VAR</span>`,``,
+    `<span class="cm">(* Call cyclically at DeltaT interval *)</span>`,
+    `Error := Setpoint - ProcessValue;`,
+    `U_Raw := <span class="nb">Kp</span> * Error + <span class="nb">Ki</span> * Integral + <span class="nb">Kd</span> * (-(ProcessValue - LastPV) / DeltaT);`,``,
+    `<span class="cm">(* Conditional anti-windup *)</span>`,
+    `<span class="kw">IF</span> (U_Raw >= OutMin) <span class="kw">AND</span> (U_Raw <= OutMax) <span class="kw">THEN</span>`,
+    `    Integral := Integral + Error * DeltaT;`,
+    `<span class="kw">END_IF</span>`,``,
+    `Output := LIMIT(OutMin, <span class="nb">Kp</span>*Error + <span class="nb">Ki</span>*Integral + <span class="nb">Kd</span>*(-(ProcessValue-LastPV)/DeltaT), OutMax);`,
+    `LastPV := ProcessValue;`,
+  ].join('\n');
+}
+
+// ── CONTEXTUAL WARNINGS ───────────────────────────────────────────
+function checkPIDWarnings() {
+  const box = document.getElementById('pid-warnings');
+  if (!box) return;
+  const t  = TR[S.uiLang] || TR.en;
+  const r  = S.results ? S.results[S.method] : null;
+  const lt = S.T > 0 ? S.L / S.T : 0;
+  const dFilterOn = document.getElementById('d-filter')?.checked;
+  const warns = [];
+
+  const W = {
+    en: {
+      'w-noise':    ['⚠ D-term + no filter', 'D-term amplifies sensor noise. Enable the D-Filter in the sidebar for real plants, especially motors and fast sensors.'],
+      'w-delay-hi': ['⚠ Large dead time (L/T > 0.5)', 'Z-N tuning becomes very aggressive at high L/T. Lambda/IMC handles large delays better — consider switching methods.'],
+      'w-delay-cr': ['⛔ Critical delay (L/T > 1)', 'Standard PID is near its stability limit. Consider a Smith Predictor. ITAE is invalid here.'],
+      'w-zn':       ['💡 Ziegler-Nichols selected', 'Z-N is designed for a quarter-decay response — expect 20–60% overshoot. Reduce Kp by 20–30% at first commissioning on a real plant.'],
+      'w-slow':     ['💡 Slow process (T > 60s)', 'Long integral time may cause slow disturbance rejection. Watch for actuator saturation on startup.'],
+      'w-fast':     ['💡 Fast plant (T < 0.5s)', 'Sample rate matters. Ensure your controller loop runs at ≥10× the bandwidth. Consider reducing Kd or enabling the D-filter.'],
+      'w-nonlin':   ['💡 Real-world reminder', 'PID is tuned for one operating point. Friction, backlash and actuator deadband can cause limit cycling. Verify on the real plant.'],
+    },
+    ru: {
+      'w-noise':    ['⚠ D-член без фильтра', 'D-член усиливает шум датчика. Включите D-Фильтр в настройках — особенно для моторов и быстрых датчиков.'],
+      'w-delay-hi': ['⚠ Большое запаздывание (L/T > 0.5)', 'Z-N даёт очень агрессивную настройку при высоком L/T. Lambda/IMC лучше справляется с большими запаздываниями.'],
+      'w-delay-cr': ['⛔ Критическое запаздывание (L/T > 1)', 'Стандартный PID близок к границе устойчивости. Рассмотрите Smith Predictor. ITAE здесь неприменим.'],
+      'w-zn':       ['💡 Выбран Ziegler-Nichols', 'Z-N спроектирован для четвертичного затухания — ожидайте 20–60% перерегулирования. При пуске на реальном объекте уменьшите Kp на 20–30%.'],
+      'w-slow':     ['💡 Медленный процесс (T > 60с)', 'Большое время интегрирования может замедлить подавление возмущений. Следите за насыщением актуатора при пуске.'],
+      'w-fast':     ['💡 Быстрый объект (T < 0.5с)', 'Частота дискретизации критична. Убедитесь что цикл контроллера работает с частотой ≥10× полосы пропускания.'],
+      'w-nonlin':   ['💡 Реальный объект', 'PID настроен для одной рабочей точки. Трение, люфт и зона нечувствительности актуатора могут вызвать автоколебания.'],
+    }
+  };
+  const w = W[S.uiLang] || W.en;
+
+  // 1. D-term без фильтра
+  if (r && r.Kd > 0 && !dFilterOn) warns.push(['warn', w['w-noise']]);
+
+  // 2. Критическое запаздывание
+  if (lt > 1)        warns.push(['error', w['w-delay-cr']]);
+  else if (lt > 0.5) warns.push(['warn',  w['w-delay-hi']]);
+
+  // 3. Z-N агрессивность
+  if (S.method === 'znol' || S.method === 'zncl') warns.push(['info', w['w-zn']]);
+
+  // 4. Медленный процесс
+  if (S.T > 60) warns.push(['info', w['w-slow']]);
+
+  // 5. Быстрый процесс
+  if (S.T < 0.5) warns.push(['info', w['w-fast']]);
+
+  // 6. Нелинейность — всегда полезное напоминание
+  warns.push(['info', w['w-nonlin']]);
+
+  const colorMap = {
+    error: { bg:'#180410', border:'#601030', color:'#E06080', hdr:'#FF4060' },
+    warn:  { bg:'#181000', border:'#604010', color:'#C08040', hdr:'#E8A020' },
+    info:  { bg:'#060C22', border:'#1A3060', color:'#60A0C0', hdr:'#40C0E0' },
+  };
+
+  box.innerHTML = warns.map(([type, [title, text]]) => {
+    const c = colorMap[type];
+    return `<div style="background:${c.bg};border:1px solid ${c.border};color:${c.color};
+      border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:12px;line-height:1.5">
+      <strong style="color:${c.hdr};font-family:'Space Mono',monospace;font-size:11px">${title}</strong><br>${text}
+    </div>`;
+  }).join('');
+}
+// При изменении полей ввода — пересчитываем активный метод и запускаем анимацию
+let _liveTimer = null;
+function onLiveInput() {
+  clearTimeout(_liveTimer);
+  setCalcDirty(); // параметры изменились — подсвечиваем кнопку
+  _liveTimer = setTimeout(() => {
+    if (!S.results) return; // ещё не считали — ждём кнопку Calculate
+    const K  = parseFloat(document.getElementById('in-K')?.value)  || S.K;
+    const T  = parseFloat(document.getElementById('in-T')?.value)  || S.T;
+    const L  = parseFloat(document.getElementById('in-L')?.value ?? 0);
+    const Ku = parseFloat(document.getElementById('in-Ku')?.value) || S.Ku;
+    const Tu = parseFloat(document.getElementById('in-Tu')?.value) || S.Tu;
+    const lam = parseFloat(document.getElementById('lambda-sl')?.value) || S.lambda;
+    S.K = K; S.T = T; S.L = L; S.Ku = Ku; S.Tu = Tu; S.lambda = lam;
+    // Быстрый пересчёт только активного метода
+    const opts = getCalcOpts();
+    S.results = calcAll(K, T, L, Ku, Tu, lam, opts);
+    S.simCache = {};
+    const r = S.results[S.method];
+    if (r) {
+      S.simData = simulate(K, T, L, r.Kp, r.Ki, r.Kd);
+      S.metrics  = metrics(S.simData.y, S.simData.Ts);
+      const f = (v, d=3) => v == null || isNaN(v) ? '—' : v.toFixed(d);
+      document.getElementById('v-kp').textContent = f(r.Kp);
+      document.getElementById('v-ki').textContent = f(r.Ki);
+      document.getElementById('v-kd').textContent = f(r.Kd);
+      document.getElementById('v-os').textContent = f(S.metrics.os, 1);
+      document.getElementById('v-ts').textContent = f(S.metrics.ts, 1);
+      animateGraph(S.simData);
+      updateCode();
+      checkPIDWarnings(); // предупреждения тоже обновляются
+    }
+  }, 400);
+}
+
+// ── TRANSLATIONS ──────────────────────────────────────────────────
+const TR = {
+  en: {
+    'presets':'Quick Presets','preset-temp':'Temperature','preset-pressure':'Pressure','preset-level':'Level',
+    'preset-motor-group':'⚙ Motor',
+    'preset-motor-speed':'DC Speed','preset-motor-pos':'DC Position','preset-servo':'Servo','preset-conveyor':'Conveyor',
+    'input-mode':'Input Mode','plant-model':'Plant Model',
+    'k-label':'K — Process Gain','k-hint':'Steady-state output/input ratio',
+    'T-label':'T — Time Constant, s','T-hint':'Time to reach 63% of steady-state',
+    'L-label':'L — Dead Time, s','L-hint':'Transport delay of the plant',
+    'ultimate-params':'Ultimate Parameters','ku-label':'Ku — Ultimate Gain','tu-label':'Tu — Ultimate Period, s',
+    'ultimate-note':'For step response simulation, also fill FOPDT parameters above.',
+    'tuning-method':'Tuning Method','ctrl-type':'Controller Type',
+    'out-limits':'Output Limits','out-min':'Min','out-max':'Max',
+    'd-filter-title':'D-Term Filter','d-filter-label':'Enable filter (Tf = Td / N)',
+    'd-filter-N-label':'N — filter coefficient','d-filter-N-hint':'Typical: 5–20. Higher = less filtering',
+    'btn-calc':'▶ CALCULATE',
+    'disclaimer':'⚠ Results based on ideal FOPDT model. Verify on real plant.',
+    'kpi-kp-unit':'proportional','kpi-ki-unit':'integral','kpi-kd-unit':'derivative',
+    'kpi-os':'Overshoot','kpi-ts':'Settling','kpi-ts-unit':'seconds (±5%)',
+    'step-title':'Step Response','bode-title':'Bode Plot — Open Loop','bode-tab':'Bode Plot',
+    'legend-sp':'Setpoint','legend-resp':'Response',
+    'comp-title':'Method Comparison','col-method':'Method','col-os':'Overshoot',
+    'code-title':'Code Export',
+    'd-term-note':'⚠ D-term: derivative on measurement (no derivative kick). Add D-filter for noisy signals.',
+    'ratio-easy':'Easy plant','ratio-moderate':'Moderate','ratio-difficult':'Difficult','ratio-critical':'Critical delay',
+    'hint-easy':'All methods work well','hint-moderate':'Standard tuning applicable',
+    'hint-difficult':'Prefer Lambda/IMC, large overshoot likely with Z-N',
+    'hint-critical':'Consider Smith Predictor. ITAE may be invalid here.',
+  },
+  ru: {
+    'presets':'Быстрые примеры','preset-temp':'Температура','preset-pressure':'Давление','preset-level':'Уровень',
+    'preset-motor-group':'⚙ Мотор',
+    'preset-motor-speed':'DC Скорость','preset-motor-pos':'DC Позиция','preset-servo':'Сервопривод','preset-conveyor':'Конвейер',
+    'input-mode':'Режим ввода','plant-model':'Объект управления',
+    'k-label':'K — коэффициент усиления','k-hint':'Отношение выхода к входу в уст. режиме',
+    'T-label':'T — постоянная времени, с','T-hint':'Время выхода на 63% от уст. значения',
+    'L-label':'L — запаздывание, с','L-hint':'Транспортное запаздывание объекта',
+    'ultimate-params':'Предельные параметры','ku-label':'Ku — предельное усиление','tu-label':'Tu — период автоколебаний, с',
+    'ultimate-note':'Для симуляции дополнительно заполните параметры FOPDT выше.',
+    'tuning-method':'Метод настройки','ctrl-type':'Тип контроллера',
+    'out-limits':'Ограничения выхода','out-min':'Мин','out-max':'Макс',
+    'd-filter-title':'D-Фильтр','d-filter-label':'Включить фильтр (Tf = Td / N)',
+    'd-filter-N-label':'N — коэффициент фильтра','d-filter-N-hint':'Типично: 5–20. Больше = меньше фильтрации',
+    'btn-calc':'▶ РАССЧИТАТЬ',
+    'disclaimer':'⚠ Расчёт по идеальной FOPDT модели. Проверяйте на реальном объекте.',
+    'kpi-kp-unit':'пропорц.','kpi-ki-unit':'интеграл.','kpi-kd-unit':'дифферен.',
+    'kpi-os':'Перерег.','kpi-ts':'Т-устан.','kpi-ts-unit':'секунд (±5%)',
+    'step-title':'Переходный процесс','bode-title':'Диаграмма Боде — разомкнутый контур','bode-tab':'Диаграмма Боде',
+    'legend-sp':'Уставка','legend-resp':'Отклик',
+    'comp-title':'Сравнение методов','col-method':'Метод','col-os':'Перерег.',
+    'code-title':'Экспорт кода',
+    'd-term-note':'⚠ D-член: производная по измерению (нет derivative kick). Добавьте D-фильтр для зашумлённых сигналов.',
+    'ratio-easy':'Лёгкий объект','ratio-moderate':'Умеренный','ratio-difficult':'Сложный','ratio-critical':'Критическое запаздывание',
+    'hint-easy':'Все методы работают хорошо','hint-moderate':'Стандартная настройка применима',
+    'hint-difficult':'Рекомендуется Lambda/IMC',
+    'hint-critical':'Рассмотрите Smith Predictor. ITAE может не работать.',
+  }
+};
+
+function applyLang() {
+  const t = TR[S.uiLang] || TR.en;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) el.textContent = t[key];
+  });
+}
+
+function renderRatioBlock(lt) {
+  if (lt === undefined) {
+    if (!S.T || S.T === 0) return;
+    lt = S.L / S.T;
+  }
+  const t = TR[S.uiLang] || TR.en;
+  const ltMode = lt < 0.1 ? t['ratio-easy'] : lt < 0.3 ? t['ratio-moderate'] : lt < 1 ? t['ratio-difficult'] : t['ratio-critical'];
+  const ltHint = lt < 0.1 ? t['hint-easy'] : lt < 0.3 ? t['hint-moderate'] : lt < 1 ? t['hint-difficult'] : t['hint-critical'];
+  const el = document.getElementById('r-lt');
+  if (!el) return;
+  el.textContent = lt.toFixed(3);
+  document.getElementById('r-mode').textContent = ltMode;
+  document.getElementById('r-hint').textContent = ltHint;
+}
+
+function setUILang(lang) {
+  S.uiLang = lang;
+  const sel = document.getElementById('ui-lang-sel');
+  if (sel) sel.value = lang;
+  applyLang();
+  if (S.results) {
+    renderCompTable();
+    renderRatioBlock();  // ratio блок с новым языком
+    checkPIDWarnings();  // предупреждения с новым языком
+  }
+}
+
+function shareURL(btn) {
+  const p = new URLSearchParams();
+  p.set('K', S.K); p.set('T', S.T); p.set('L', S.L);
+  p.set('Ku', S.Ku); p.set('Tu', S.Tu);
+  p.set('lam', S.lambda); p.set('m', S.method);
+  if (S.mode !== 'fopdt') p.set('mode', S.mode);
+  const url = location.href.split('#')[0] + '#' + p.toString();
+  navigator.clipboard.writeText(url).then(() => {
+    const prev = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = prev, 1500);
+  });
+}
+
+function loadFromURL() {
+  if (!location.hash || location.hash.length < 2) return;
+  try {
+    const p = new URLSearchParams(location.hash.slice(1));
+    const set = (id, val) => { if (val !== null) document.getElementById(id).value = val; };
+    if (p.get('K'))   { set('in-K', p.get('K'));   S.K = parseFloat(p.get('K')); }
+    if (p.get('T'))   { set('in-T', p.get('T'));   S.T = parseFloat(p.get('T')); }
+    if (p.get('L'))   { set('in-L', p.get('L'));   S.L = parseFloat(p.get('L')); }
+    if (p.get('Ku'))  { set('in-Ku', p.get('Ku')); S.Ku = parseFloat(p.get('Ku')); }
+    if (p.get('Tu'))  { set('in-Tu', p.get('Tu')); S.Tu = parseFloat(p.get('Tu')); }
+    if (p.get('lam')) { const v = parseFloat(p.get('lam')); S.lambda = v; document.getElementById('lambda-sl').value = v; onLambda(v); }
+    if (p.get('mode')) setMode(p.get('mode'));
+    if (p.get('m'))    setMethod(p.get('m'), false);
+  } catch(e) { console.warn('loadFromURL:', e); }
+}
+
+function doPrint() {
+  // Перед печатью рисуем граф заново (он может быть на середине анимации)
+  if (S.simData) drawGraph(S.simData, 1);
+  setTimeout(() => window.print(), 100);
+}
+
+function sortTable(col) {
+  if (S.sortCol === col) S.sortDir *= -1;
+  else { S.sortCol = col; S.sortDir = 1; }
+  // Обновить иконки
+  ['kp','ki','kd','os'].forEach(c => {
+    const el = document.getElementById('si-' + c);
+    if (el) el.textContent = c === S.sortCol ? (S.sortDir === 1 ? '↑' : '↓') : '↕';
+  });
+  if (S.results) renderCompTable();
+}
+
+function savePNG(canvasId, name) {
+  const cv = document.getElementById(canvasId);
+  const a = document.createElement('a');
+  a.href = cv.toDataURL('image/png');
+  a.download = `pid-${name}-${Date.now()}.png`;
+  a.click();
+}
+
+let _bodeAnimFrame = null;
+
+function animateBode(K, T, L, Kp, Ki, Kd) {
+  if (_bodeAnimFrame) { cancelAnimationFrame(_bodeAnimFrame); _bodeAnimFrame = null; }
+  const DURATION = 1500;
+  const start = performance.now();
+  function frame(now) {
+    const progress = Math.min(1, (now - start) / DURATION);
+    drawBode(K, T, L, Kp, Ki, Kd, progress);
+    if (progress < 1) _bodeAnimFrame = requestAnimationFrame(frame);
+    else _bodeAnimFrame = null;
+  }
+  _bodeAnimFrame = requestAnimationFrame(frame);
+}
+
+function switchView(v) {
+  document.getElementById('view-step').style.display = v === 'step' ? 'block' : 'none';
+  document.getElementById('view-bode').style.display = v === 'bode' ? 'block' : 'none';
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('vtab-' + v).classList.add('active');
+  if (v === 'bode' && S.results) {
+    const r = S.results[S.method];
+    if (r) animateBode(S.K, S.T, S.L, r.Kp, r.Ki, r.Kd);
+  }
+}
+
+// D-filter checkbox toggle
+document.addEventListener('change', e => {
+  if (e.target.id === 'd-filter') {
+    document.getElementById('d-filter-n').style.display = e.target.checked ? 'block' : 'none';
+    if (S.results) updateCode();
+  }
+});
+
+// ── BODE PLOT ──────────────────────────────────────────────────────
+function calcBode(K, T, L, Kp, Ki, Kd) {
+  const N = 400;
+  const wMin = 0.001 / Math.max(T, 0.01);
+  const wMax = 1000 / Math.max(T, 0.01);
+  const omega = [], gain = [], phase = [];
+
+  for (let i = 0; i < N; i++) {
+    const w = wMin * Math.pow(wMax / wMin, i / (N - 1));
+    // Plant G(jw) = K * e^(-jwL) / (jwT + 1)
+    const Gmag   = K / Math.sqrt(1 + (w * T) ** 2);
+    const Gphase = -w * L - Math.atan(w * T); // rad
+
+    // Controller C(jw) = Kp + Ki/(jw) + Kd*jw
+    const Cr = Kp;
+    const Ci = (w > 1e-12 ? Kd * w - Ki / w : Kd * w);
+    const Cmag   = Math.sqrt(Cr * Cr + Ci * Ci);
+    const Cphase = Math.atan2(Ci, Cr);
+
+    const Lmag = Cmag * Gmag;
+    omega.push(w);
+    gain.push(20 * Math.log10(Math.max(Lmag, 1e-12)));
+    phase.push((Cphase + Gphase) * 180 / Math.PI);
+  }
+
+  // Phase margin: at gain crossover (gain = 0 dB)
+  let pm = null;
+  for (let i = 1; i < N; i++) {
+    if (gain[i-1] > 0 && gain[i] <= 0) {
+      const t = gain[i-1] / (gain[i-1] - gain[i]);
+      pm = 180 + phase[i-1] + t * (phase[i] - phase[i-1]);
+      break;
+    }
+  }
+
+  // Gain margin: at phase crossover (phase = -180°)
+  let gm = null;
+  for (let i = 1; i < N; i++) {
+    if (phase[i-1] > -180 && phase[i] <= -180) {
+      const t = (phase[i-1] + 180) / (phase[i-1] - phase[i]);
+      const g_pc = gain[i-1] + t * (gain[i] - gain[i-1]);
+      gm = -g_pc;
+      break;
+    }
+  }
+
+  return { omega, gain, phase, pm, gm };
+}
+
+function drawBode(K, T, L, Kp, Ki, Kd, progress) {
+  progress = (progress === undefined) ? 1 : Math.max(0, Math.min(1, progress));
+  const bode = calcBode(K, T, L, Kp, Ki, Kd);
+  const cv   = document.getElementById('bode-cv');
+  const dpr  = devicePixelRatio || 1;
+  cv.width   = cv.offsetWidth * dpr;
+  cv.height  = 340 * dpr;
+  const ctx  = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const pd = { l: 52*dpr, r: 20*dpr, t: 16*dpr, b: 30*dpr, mid: 20*dpr };
+  const gh = (H - pd.t - pd.b - pd.mid) / 2; // height of each sub-plot
+  const pw = W - pd.l - pd.r;
+
+  ctx.fillStyle = '#080514';
+  ctx.fillRect(0, 0, W, H);
+
+  const N = bode.omega.length;
+  const Nvis = Math.max(2, Math.floor(N * progress));
+  const wMin = bode.omega[0], wMax = bode.omega[N-1];
+  const toX = w => pd.l + Math.log10(w / wMin) / Math.log10(wMax / wMin) * pw;
+
+  // ── GAIN PLOT ──
+  const gTop = pd.t;
+  const gMin = -60, gMax = Math.max(40, Math.ceil(Math.max(...bode.gain) / 10) * 10 + 10);
+  const gRange = gMax - gMin;
+  const toGY = g => gTop + (1 - (g - gMin) / gRange) * gh;
+
+  // Grid gain
+  ctx.strokeStyle = '#1A0A2A'; ctx.lineWidth = 1;
+  [-40,-20,0,20,40].filter(g => g >= gMin && g <= gMax).forEach(g => {
+    const y = toGY(g);
+    ctx.beginPath(); ctx.moveTo(pd.l, y); ctx.lineTo(pd.l + pw, y); ctx.stroke();
+  });
+  // 0dB line highlight
+  ctx.strokeStyle = '#2A1A4A'; ctx.lineWidth = 1.5*dpr;
+  ctx.setLineDash([4*dpr, 3*dpr]);
+  ctx.beginPath(); ctx.moveTo(pd.l, toGY(0)); ctx.lineTo(pd.l+pw, toGY(0)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Gain curve
+  ctx.strokeStyle = '#E8A020'; ctx.lineWidth = 2*dpr;
+  ctx.shadowColor = '#E8A020'; ctx.shadowBlur = 4*dpr;
+  ctx.beginPath();
+  bode.gain.slice(0, Nvis).forEach((g, i) => {
+    const x = toX(bode.omega[i]), y = toGY(Math.max(gMin, Math.min(gMax, g)));
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke(); ctx.shadowBlur = 0;
+
+  // Gain axis label
+  ctx.fillStyle = '#7060A0'; ctx.font = `${9*dpr}px Space Mono`; ctx.textAlign = 'right';
+  [-40,-20,0,20,40].filter(g => g >= gMin && g <= gMax).forEach(g => {
+    ctx.fillText(g+'dB', pd.l - 4*dpr, toGY(g) + 3*dpr);
+  });
+  ctx.fillStyle = '#A060E0'; ctx.font = `${9*dpr}px Space Mono`; ctx.textAlign = 'center';
+  ctx.fillText('Gain', pd.l - 28*dpr, gTop + gh/2);
+
+  // ── PHASE PLOT ──
+  const pTop = gTop + gh + pd.mid;
+  const phMin = -270, phMax = 0;
+  const toPY = p => pTop + (1 - (p - phMin) / (phMax - phMin)) * gh;
+
+  ctx.strokeStyle = '#1A0A2A'; ctx.lineWidth = 1;
+  [-270,-180,-90,0].forEach(p => {
+    const y = toPY(p);
+    ctx.beginPath(); ctx.moveTo(pd.l, y); ctx.lineTo(pd.l + pw, y); ctx.stroke();
+  });
+  // -180° line
+  ctx.strokeStyle = '#2A1A4A'; ctx.lineWidth = 1.5*dpr;
+  ctx.setLineDash([4*dpr, 3*dpr]);
+  ctx.beginPath(); ctx.moveTo(pd.l, toPY(-180)); ctx.lineTo(pd.l+pw, toPY(-180)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Phase curve
+  ctx.strokeStyle = '#20C0D0'; ctx.lineWidth = 2*dpr;
+  ctx.shadowColor = '#20C0D0'; ctx.shadowBlur = 4*dpr;
+  ctx.beginPath();
+  bode.phase.slice(0, Nvis).forEach((p, i) => {
+    const x = toX(bode.omega[i]), y = toPY(Math.max(phMin, Math.min(phMax, p)));
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke(); ctx.shadowBlur = 0;
+
+  // Phase axis label
+  ctx.fillStyle = '#7060A0'; ctx.font = `${9*dpr}px Space Mono`; ctx.textAlign = 'right';
+  [-270,-180,-90,0].forEach(p => ctx.fillText(p+'°', pd.l-4*dpr, toPY(p)+3*dpr));
+
+  // X axis labels (frequency)
+  ctx.textAlign = 'center';
+  const decades = Math.log10(wMax / wMin);
+  for (let d = 0; d <= decades; d++) {
+    const w = wMin * Math.pow(10, d);
+    if (w > wMax) break;
+    const x = toX(w);
+    ctx.fillText(w < 0.1 ? w.toFixed(3) : w < 10 ? w.toFixed(2) : w.toFixed(0), x, pTop + gh + 18*dpr);
+  }
+  ctx.fillStyle = '#7060A0';
+  ctx.fillText('ω (rad/s)', pd.l + pw/2, pTop + gh + 28*dpr);
+
+  // Axes lines
+  ctx.strokeStyle = '#3A1A60'; ctx.lineWidth = 1.5*dpr;
+  ctx.beginPath();
+  ctx.moveTo(pd.l, gTop); ctx.lineTo(pd.l, gTop+gh); ctx.lineTo(pd.l+pw, gTop+gh); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(pd.l, pTop); ctx.lineTo(pd.l, pTop+gh); ctx.lineTo(pd.l+pw, pTop+gh); ctx.stroke();
+
+  // Update PM/GM display — только после завершения анимации
+  if (progress >= 1) {
+    const pmEl = document.getElementById('bode-pm');
+    const gmEl = document.getElementById('bode-gm');
+    pmEl.textContent = bode.pm != null ? `PM: ${bode.pm.toFixed(1)}°` : 'PM: ∞';
+    gmEl.textContent = bode.gm != null ? `GM: ${bode.gm.toFixed(1)} dB` : 'GM: ∞';
+    pmEl.style.color = bode.pm != null && bode.pm < 30 ? 'var(--red)' : 'var(--green)';
+    gmEl.style.color = bode.gm != null && bode.gm < 6  ? 'var(--red)' : 'var(--cyan)';
+  }
+}
+
+function updateCode() {
+  document.getElementById('code-out').innerHTML = genCode();
+}
+
+function copyCode(btn) {
+  navigator.clipboard.writeText(document.getElementById('code-out').innerText)
+    .then(() => {
+      const prev = btn.textContent;
+      btn.textContent = '✓ Copied';
+      setTimeout(() => btn.textContent = prev, 1500);
+    });
+}
+
+// ── UI HANDLERS ───────────────────────────────────────────────────
+function setMode(m) {
+  if (S.mode === m) return; // предотвращает рекурсию
+  S.mode = m;
+  setCalcDirty();
+  document.getElementById('panel-fopdt').style.display    = m==='fopdt'   ?'block':'none';
+  document.getElementById('panel-ultimate').style.display = m==='ultimate'?'block':'none';
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mode-'+m).classList.add('active');
+  if (m==='ultimate') setMethod('zncl', false);
+}
+
+function setMethod(id, rerun=true) {
+  S.method = id;
+  document.querySelectorAll('.m-pill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pill-'+id)?.classList.add('active');
+  document.getElementById('lambda-block').style.display = id==='lambda' ? 'block' : 'none';
+  document.getElementById('itae-block').style.display   = id==='itae'   ? 'block' : 'none';
+  if (id==='zncl' && S.mode !== 'ultimate') setMode('ultimate');
+  if (rerun && S.results) { runSimForMethod(id); renderCompTable(); updateCode(); saveLS(); }
+}
+
+function setLang(l) {
+  S.lang = l;
+  document.querySelectorAll('.lang-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+l).classList.add('active');
+  updateCode();
+}
+
+function onLambda(v) {
+  S.lambda = parseFloat(v);
+  document.getElementById('lambda-v').textContent = S.lambda.toFixed(1) + ' с';
+  const L = parseFloat(document.getElementById('in-L').value) || 2;
+  document.getElementById('lambda-hint').textContent = (2*L).toFixed(1)+'–'+(4*L).toFixed(1)+' с';
+}
+
+// ── STORAGE ───────────────────────────────────────────────────────
+function saveLS() {
+  localStorage.setItem('pid_tk', JSON.stringify({
+    K:S.K,T:S.T,L:S.L,Ku:S.Ku,Tu:S.Tu,
+    lambda:S.lambda,method:S.method,mode:S.mode,lang:S.lang
+  }));
+}
+
+function loadLS() {
+  try {
+    const d = JSON.parse(localStorage.getItem('pid_tk')||'null');
+    if (!d) return;
+    if(d.K  !== undefined) document.getElementById('in-K').value  = d.K;
+    if(d.T  !== undefined) document.getElementById('in-T').value  = d.T;
+    if(d.L  !== undefined) document.getElementById('in-L').value  = d.L;
+    if(d.Ku !== undefined) document.getElementById('in-Ku').value = d.Ku;
+    if(d.Tu !== undefined) document.getElementById('in-Tu').value = d.Tu;
+    if(d.lambda){ document.getElementById('lambda-sl').value=d.lambda; onLambda(d.lambda); }
+    if(d.lang)   setLang(d.lang);
+    if(d.method) setMethod(d.method, false);
+    if(d.mode)   setMode(d.mode);
+  } catch(e){}
+}
+
+function exportJSON() {
+  const d = { pid_toolkit:true, version:1,
+    K:S.K,T:S.T,L:S.L,Ku:S.Ku,Tu:S.Tu,
+    lambda:S.lambda,method:S.method,mode:S.mode,lang:S.lang };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
+  a.download = `pid-toolkit-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importJSON() {
+  const inp = document.createElement('input');
+  inp.type='file'; inp.accept='.json';
+  inp.onchange = e => {
+    const f = e.target.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        if(!d.pid_toolkit){ alert('Не файл PID Toolkit'); return; }
+        if(d.K  !== undefined) document.getElementById('in-K').value  = d.K;
+        if(d.T  !== undefined) document.getElementById('in-T').value  = d.T;
+        if(d.L  !== undefined) document.getElementById('in-L').value = d.L;
+        if(d.Ku !== undefined) document.getElementById('in-Ku').value = d.Ku;
+        if(d.Tu !== undefined) document.getElementById('in-Tu').value = d.Tu;
+        if(d.lambda){ document.getElementById('lambda-sl').value=d.lambda; onLambda(d.lambda); }
+        if(d.lang)   setLang(d.lang);
+        if(d.method) setMethod(d.method, false);
+        if(d.mode)   setMode(d.mode);
+        calculate();
+      } catch(err){ alert('Ошибка: '+err.message); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  loadLS();
+  loadFromURL();
+  applyLang(); // применяем язык из сохранённых настроек
+  drawGraph(null);
+  let resizeTimer;
+  new ResizeObserver(() => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (S.simData) drawGraph(S.simData, 1); else drawGraph(null);
+    }, 60);
+  }).observe(document.getElementById('graph').parentElement);
+});
+</script>
+</body>
+</html>
