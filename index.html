@@ -370,6 +370,11 @@ pre#code-out{background:#080514;border-radius:6px;padding:14px;font-family:'Spac
 
     <button class="btn-calc" onclick="calculate()" data-i18n="btn-calc">▶ CALCULATE</button>
 
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button class="btn btn-sm" style="flex:1;font-size:11px" onclick="resetSettings()" data-i18n="btn-reset">↺ Reset</button>
+      <button class="btn btn-sm btn-danger" style="flex:1;font-size:11px" onclick="clearAll()" data-i18n="btn-clear">⛔ Clear all</button>
+    </div>
+
     <div style="margin-top:10px;font-size:10px;color:var(--muted);line-height:1.6;font-family:'Space Mono',monospace" data-i18n="disclaimer">
       ⚠ Results based on ideal FOPDT model. Verify on real plant.
     </div>
@@ -1110,7 +1115,7 @@ function checkPIDWarnings() {
       'w-nonlin':   ['💡 Real-world reminder', 'PID is tuned for one operating point. Friction, backlash and actuator deadband can cause limit cycling. Verify on the real plant.'],
     },
     ru: {
-      'w-noise':    ['⚠ D-член без фильтра', 'D-член усиливает шум датчика. Включите D-Фильтр в настройках — особенно для моторов и быстрых датчиков.'],
+      'w-noise':    ['⚠ D-term без фильтра', 'D-term усиливает шум датчика. Включите D-Filter в настройках — особенно для моторов и быстрых датчиков.'],
       'w-delay-hi': ['⚠ Большое запаздывание (L/T > 0.5)', 'Z-N даёт очень агрессивную настройку при высоком L/T. Lambda/IMC лучше справляется с большими запаздываниями.'],
       'w-delay-cr': ['⛔ Критическое запаздывание (L/T > 1)', 'Стандартный PID близок к границе устойчивости. Рассмотрите Smith Predictor. ITAE здесь неприменим.'],
       'w-zn':       ['💡 Выбран Ziegler-Nichols', 'Z-N спроектирован для четвертичного затухания — ожидайте 20–60% перерегулирования. При пуске на реальном объекте уменьшите Kp на 20–30%.'],
@@ -1206,6 +1211,8 @@ const TR = {
     'd-filter-title':'D-Term Filter','d-filter-label':'Enable filter (Tf = Td / N)',
     'd-filter-N-label':'N — filter coefficient','d-filter-N-hint':'Typical: 5–20. Higher = less filtering',
     'btn-calc':'▶ CALCULATE',
+    'btn-reset':'↺ Reset settings',
+    'btn-clear':'⛔ Clear all',
     'disclaimer':'⚠ Results based on ideal FOPDT model. Verify on real plant.',
     'kpi-kp-unit':'proportional','kpi-ki-unit':'integral','kpi-kd-unit':'derivative',
     'kpi-os':'Overshoot','kpi-ts':'Settling','kpi-ts-unit':'seconds (±5%)',
@@ -1234,6 +1241,8 @@ const TR = {
     'd-filter-title':'D-Фильтр','d-filter-label':'Включить фильтр (Tf = Td / N)',
     'd-filter-N-label':'N — коэффициент фильтра','d-filter-N-hint':'Типично: 5–20. Больше = меньше фильтрации',
     'btn-calc':'▶ РАССЧИТАТЬ',
+    'btn-reset':'↺ Сбросить',
+    'btn-clear':'⛔ Очистить всё',
     'disclaimer':'⚠ Расчёт по идеальной FOPDT модели. Проверяйте на реальном объекте.',
     'kpi-kp-unit':'пропорц.','kpi-ki-unit':'интеграл.','kpi-kd-unit':'дифферен.',
     'kpi-os':'Перерег.','kpi-ts':'Т-устан.','kpi-ts-unit':'секунд (±5%)',
@@ -1241,7 +1250,7 @@ const TR = {
     'legend-sp':'Уставка','legend-resp':'Отклик',
     'comp-title':'Сравнение методов','col-method':'Метод','col-os':'Перерег.',
     'code-title':'Экспорт кода',
-    'd-term-note':'⚠ D-член: производная по измерению (нет derivative kick). Добавьте D-фильтр для зашумлённых сигналов.',
+    'd-term-note':'⚠ D-term: производная по измерению (нет derivative kick). Добавьте D-filter для зашумлённых сигналов.',
     'ratio-easy':'Лёгкий объект','ratio-moderate':'Умеренный','ratio-difficult':'Сложный','ratio-critical':'Критическое запаздывание',
     'hint-easy':'Все методы работают хорошо','hint-moderate':'Стандартная настройка применима',
     'hint-difficult':'Рекомендуется Lambda/IMC',
@@ -1610,6 +1619,56 @@ function loadLS() {
     if(d.method) setMethod(d.method, false);
     if(d.mode)   setMode(d.mode);
   } catch(e){}
+}
+
+function resetSettings() {
+  const t = TR[S.uiLang] || TR.en;
+  const msg = S.uiLang === 'ru'
+    ? 'Сбросить параметры к значениям по умолчанию?'
+    : 'Reset all parameters to defaults?';
+  if (!confirm(msg)) return;
+
+  // Сброс состояния
+  S.K = 1; S.T = 10; S.L = 2; S.Ku = 5; S.Tu = 8; S.lambda = 4;
+  S.method = 'znol'; S.mode = 'fopdt';
+  S.results = null; S.simData = null; S.metrics = null; S.simCache = {};
+
+  // Сброс полей ввода
+  document.getElementById('in-K').value  = 1;
+  document.getElementById('in-T').value  = 10;
+  document.getElementById('in-L').value  = 2;
+  document.getElementById('in-Ku').value = 5;
+  document.getElementById('in-Tu').value = 8;
+  document.getElementById('lambda-sl').value = 4;
+  document.getElementById('out-min').value = 0;
+  document.getElementById('out-max').value = 100;
+  document.getElementById('d-filter').checked = false;
+
+  // Сброс режимов
+  setMode('fopdt');
+  setMethod('znol', false);
+  document.querySelectorAll('input[name="ctrl-type"]').forEach(r => r.checked = r.value === 'pid');
+  document.querySelectorAll('input[name="lambda-type"]').forEach(r => r.checked = r.value === 'pi');
+  document.querySelectorAll('input[name="itae-type"]').forEach(r => r.checked = r.value === 'servo');
+
+  // Очистка результатов
+  document.getElementById('pid-warnings').innerHTML = '';
+  document.getElementById('ratio-block').style.display = 'none';
+  drawGraph(null);
+
+  // Очистка localStorage
+  localStorage.removeItem('pid_state');
+
+  setCalcDirty();
+}
+
+function clearAll() {
+  const msg = S.uiLang === 'ru'
+    ? 'Удалить все данные? Это действие необратимо.'
+    : 'Delete all saved data? This cannot be undone.';
+  if (!confirm(msg)) return;
+  localStorage.clear();
+  resetSettings();
 }
 
 function exportJSON() {
