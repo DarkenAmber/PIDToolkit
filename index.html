@@ -21,8 +21,37 @@
   --purple: #A060E0;
   --blue:   #4090E0;
 }
+/* LIGHT THEME — тёплый серый */
+body.light {
+  --bg:     #CEC8BE;
+  --bg2:    #C4BEB4;
+  --card:   #DAD4CA;
+  --border: #B4AEA4;
+  --acc:    #A05800;
+  --acc2:   #804000;
+  --text:   #1A1030;
+  --muted:  #5A5040;
+  --green:  #1A7840;
+  --red:    #B02030;
+  --cyan:   #0870A0;
+  --purple: #6040A0;
+  --blue:   #2060B0;
+}
+body.light .hdr { background: #C4BEB4; border-bottom-color: #B4AEA4; }
+body.light .comp-tbl th { background: #C4BEB4; }
+body.light .comp-tbl tr:hover td { background: #D0CAC0; }
+body.light .comp-tbl tr.act td { background: #C8C0B0; }
+body.light .btn { background: #CEC8BE; border-color: #B4AEA4; color: #1A1030; }
+body.light .btn:hover { border-color: var(--acc); color: var(--acc); }
+body.light .warn-error   { background: #D4C0BC; border-color: #B08080; color: #6A1020; }
+body.light .warn-error strong { color: #900020; }
+body.light .warn-caution { background: #D4CCBC; border-color: #B0A080; color: #5A4010; }
+body.light .warn-caution strong { color: #804010; }
+body.light .warn-info    { background: #BCCCD4; border-color: #80A0B0; color: #104050; }
+body.light .warn-info strong { color: #105060; }
+body.light .stable-badge { background: #1A7840; color: #fff; border-color: #1A7840; }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;overflow-x:hidden}
 h1,h2,h3,h4{font-family:'Space Mono',monospace}
 
 /* HEADER */
@@ -38,7 +67,7 @@ h1,h2,h3,h4{font-family:'Space Mono',monospace}
 .btn-sm{padding:4px 10px;font-size:11px}
 
 /* LAYOUT */
-.layout{display:grid;grid-template-columns:265px 1fr;height:calc(100vh - 48px)}
+.layout{display:grid;grid-template-columns:240px 1fr;height:calc(100vh - 48px)}
 .sidebar{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:14px 14px 20px}
 .main{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px}
 
@@ -46,11 +75,11 @@ h1,h2,h3,h4{font-family:'Space Mono',monospace}
 .s-title{font-size:10px;font-family:'Space Mono',monospace;color:var(--acc);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
 .s-sec{margin-bottom:18px}
 .field{margin-bottom:9px}
-.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px;font-family:'Space Mono',monospace}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px;font-family:'Space Mono',monospace}
 .field input,.field select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:7px 10px;font-size:13px;font-family:'Space Mono',monospace}
 .field input:focus,.field select:focus{outline:none;border-color:var(--acc)}
 .field select option{background:var(--bg2)}
-.field-hint{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+.field-hint{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
 
 /* mode toggle */
 .mode-toggle{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:14px}
@@ -105,7 +134,7 @@ h1,h2,h3,h4{font-family:'Space Mono',monospace}
 .graph-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-family:'Space Mono',monospace}
 .leg-line{width:18px;height:2px;border-radius:1px}
-canvas#graph,canvas#bode-cv{display:block;width:100%;border-radius:5px;background:#080514}
+canvas#graph,canvas#bode-cv{display:block;width:100%;border-radius:5px;background:var(--bg)}
 
 /* GRAPH VIEW TABS */
 .view-tabs{display:flex;gap:4px;margin-bottom:8px}
@@ -126,8 +155,9 @@ canvas#graph,canvas#bode-cv{display:block;width:100%;border-radius:5px;backgroun
 
 /* stability */
 .stab-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:'Space Mono',monospace;border-radius:4px;padding:3px 8px;border:1px solid}
-.stab-ok{color:var(--green);border-color:#1A5030;background:#081A10}
-.stab-warn{color:var(--acc);border-color:#504010;background:#181000}
+.stab-ok{color:var(--green);border-color:var(--green);background:rgba(26,120,64,0.12)}
+.stab-warn{color:var(--acc);border-color:var(--acc);background:rgba(160,88,0,0.12)}
+.stab-err{color:var(--red);border-color:var(--red);background:rgba(176,32,48,0.12)}
 .stab-err{color:var(--red);border-color:#501030;background:#180410}
 
 /* COMPARISON */
@@ -155,7 +185,7 @@ canvas#graph,canvas#bode-cv{display:block;width:100%;border-radius:5px;backgroun
 .lang-tab{padding:4px 11px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;cursor:pointer;transition:.15s}
 .lang-tab.active{border-color:var(--acc);color:var(--acc);background:var(--card)}
 .lang-tab:hover:not(.active){border-color:var(--muted);color:var(--text)}
-pre#code-out{background:#080514;border-radius:6px;padding:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text);overflow-x:auto;line-height:1.7;border:1px solid #1A0A30;max-height:320px;overflow-y:auto}
+pre#code-out{background:var(--bg);border-radius:6px;padding:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text);overflow-x:auto;line-height:1.7;border:1px solid var(--border);max-height:320px;overflow-y:auto}
 .kw{color:#A060E0}
 .cm{color:#504070;font-style:italic}
 .nm{color:var(--cyan)}
@@ -205,6 +235,7 @@ pre#code-out{background:#080514;border-radius:6px;padding:14px;font-family:'Spac
       <option value="en" selected>EN</option>
       <option value="ru">RU</option>
     </select>
+    <button class="btn btn-sm" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">🌙</button>
     <button class="btn btn-sm" onclick="shareURL(this)">⤴ Share</button>
     <button class="btn btn-sm" onclick="doPrint()">⎙ PDF</button>
     <button class="btn btn-sm" onclick="importJSON()">↑ Import</button>
@@ -416,6 +447,7 @@ pre#code-out{background:#080514;border-radius:6px;padding:14px;font-family:'Spac
             <div class="leg-item"><div class="leg-line" style="background:var(--cyan);border-top:1px dashed var(--cyan)"></div><span data-i18n="legend-sp">Setpoint</span></div>
             <div class="leg-item"><div class="leg-line" style="background:var(--acc)"></div><span data-i18n="legend-resp">Response</span></div>
             <div id="stab-el"></div>
+            <button class="btn btn-sm no-print" id="btn-skip-anim" onclick="skipAnim()" style="display:none" data-i18n="btn-skip">⏭ Skip</button>
             <button class="btn btn-sm" onclick="savePNG('graph','step-response')">⬇ PNG</button>
           </div>
         </div>
@@ -440,7 +472,12 @@ pre#code-out{background:#080514;border-radius:6px;padding:14px;font-family:'Spac
 
     <!-- COMPARISON -->
     <div class="comp-card">
-      <div class="card-title" data-i18n="comp-title">Method Comparison</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;user-select:none" onclick="toggleSection('comp')">
+        <div class="card-title" style="margin-bottom:0" id="comp-title-el">
+          <span data-i18n="comp-title">Method Comparison</span> <span id="comp-arrow" style="opacity:.6">▾</span>
+        </div>
+      </div>
+      <div id="comp-body-wrap">
       <div class="comp-tbl-wrap">
       <table class="comp-tbl">
         <thead><tr>
@@ -456,12 +493,16 @@ pre#code-out{background:#080514;border-radius:6px;padding:14px;font-family:'Spac
         </tbody>
       </table>
       </div>
+      </div>
     </div>
 
     <!-- CODE -->
     <div class="code-card">
       <div class="code-hdr">
-        <div class="card-title" style="margin-bottom:0;flex:1" data-i18n="code-title">Code Export</div>
+        <div style="flex:1;cursor:pointer;user-select:none" onclick="toggleSection('code')">
+          <span class="card-title" style="margin-bottom:0" data-i18n="code-title">Code Export</span>
+          <span id="code-arrow" style="opacity:.6;font-family:'Space Mono',monospace;font-size:11px;margin-left:4px">▾</span>
+        </div>
         <div class="lang-tabs">
           <div class="lang-tab active" id="tab-arduino"     onclick="setLang('arduino')">Arduino</div>
           <div class="lang-tab"        id="tab-esp32"       onclick="setLang('esp32')">ESP32</div>
@@ -470,10 +511,12 @@ pre#code-out{background:#080514;border-radius:6px;padding:14px;font-family:'Spac
         </div>
         <button class="btn btn-sm" onclick="copyCode(this)" style="margin-left:8px">Copy</button>
       </div>
+      <div id="code-body-wrap">
       <div style="font-size:10px;color:var(--muted);margin:8px 0 4px;font-family:'Space Mono',monospace" data-i18n="d-term-note">
         ⚠ D-term: derivative on measurement (no derivative kick). Add D-filter for noisy signals.
       </div>
       <pre id="code-out"><span style="color:var(--muted);font-style:italic">// Press Calculate to generate code</span></pre>
+      </div><!-- /code-body-wrap -->
     </div>
 
   </div>
@@ -527,7 +570,62 @@ function setCalcClean() {
   document.querySelector('.btn-calc')?.classList.remove('btn-calc-dirty');
 }
 
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  document.getElementById('theme-toggle').textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('pid_theme', isLight ? 'light' : 'dark');
+  if (S.simData) drawGraph(S.simData, 1);
+  if (S.results) checkPIDWarnings(); // цвета предупреждений меняются
+}
+
+function skipAnim() {
+  if (_animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
+  if (_bodeAnimFrame) { cancelAnimationFrame(_bodeAnimFrame); _bodeAnimFrame = null; }
+  if (S.simData) drawGraph(S.simData, 1);
+  document.getElementById('btn-skip-anim').style.display = 'none';
+}
+
+function setSkipVisible(v) {
+  const btn = document.getElementById('btn-skip-anim');
+  if (btn) btn.style.display = v ? 'inline-block' : 'none';
+}
+
+function toggleSection(id) {
+  const wrap  = document.getElementById(id + '-body-wrap');
+  const arrow = document.getElementById(id + '-arrow');
+  if (!wrap) return;
+  const collapsed = wrap.style.display === 'none';
+  wrap.style.display = collapsed ? '' : 'none';
+  if (arrow) arrow.textContent = collapsed ? '▾' : '▸';
+  localStorage.setItem('pid_collapse_' + id, collapsed ? '0' : '1');
+}
+
+function restoreCollapse() {
+  ['comp', 'code'].forEach(id => {
+    if (localStorage.getItem('pid_collapse_' + id) === '1') {
+      const wrap  = document.getElementById(id + '-body-wrap');
+      const arrow = document.getElementById(id + '-arrow');
+      if (wrap)  wrap.style.display = 'none';
+      if (arrow) arrow.textContent = '▸';
+    }
+  });
+}
+
 function safeL(L){ return Math.max(L, 0.001); }
+
+// Возвращает цвета для canvas с учётом текущей темы
+function themeColors() {
+  const light = document.body.classList.contains('light');
+  return {
+    bg:     light ? '#F0EDE8' : '#080514',
+    grid:   light ? '#D8D4CE' : '#1A0A2A',
+    muted:  light ? '#706050' : '#7060A0',
+    text:   light ? '#1A1030' : '#D0C0E8',
+    sp:     light ? '#0870A0' : '#20C0D0',  // setpoint
+    band:   light ? 'rgba(8,112,160,0.06)' : 'rgba(32,192,208,0.04)',
+    axis:   light ? '#CEC8BE' : '#3A1A60',
+  };
+}
 
 function getCalcOpts() {
   return {
@@ -697,11 +795,12 @@ function drawGraph(simData, progress) {
   const pd = { t:18*dpr, r:16*dpr, b:36*dpr, l:52*dpr };
   const pw = W - pd.l - pd.r, ph = H - pd.t - pd.b;
 
-  ctx.fillStyle = '#080514';
+  const TC = themeColors();
+  ctx.fillStyle = TC.bg;
   ctx.fillRect(0, 0, W, H);
 
   if (!simData) {
-    ctx.fillStyle = '#503060';
+    ctx.fillStyle = TC.muted;
     ctx.font = `${11*dpr}px Space Mono`;
     ctx.textAlign = 'center';
     ctx.fillText('Enter parameters and press Calculate', W/2, H/2);
@@ -725,19 +824,19 @@ function drawGraph(simData, progress) {
   ];
 
   // Grid
-  ctx.strokeStyle = '#1A0A2A';
+  ctx.strokeStyle = TC.grid;
   ctx.lineWidth = 1;
   for (let i=0;i<=10;i++){const x=pd.l+i/10*pw;ctx.beginPath();ctx.moveTo(x,pd.t);ctx.lineTo(x,pd.t+ph);ctx.stroke();}
   for (let i=0;i<=6;i++){const yy=pd.t+i/6*ph;ctx.beginPath();ctx.moveTo(pd.l,yy);ctx.lineTo(pd.l+pw,yy);ctx.stroke();}
 
   // ±5% band
   const [,b1]=px(0,1.05), [,b2]=px(0,0.95);
-  ctx.fillStyle='rgba(32,192,208,0.04)';
+  ctx.fillStyle = TC.band;
   ctx.fillRect(pd.l, b1, pw, b2-b1);
 
-  // Setpoint (пунктир появляется сразу)
+  // Setpoint
   const [sx1,sy1]=px(0,1), [sx2,sy2]=px(tMax,1);
-  ctx.strokeStyle='#20C0D0';
+  ctx.strokeStyle = TC.sp;
   ctx.lineWidth=1.5*dpr;
   ctx.setLineDash([6*dpr,4*dpr]);
   ctx.beginPath();ctx.moveTo(sx1,sy1);ctx.lineTo(sx2,sy2);ctx.stroke();
@@ -800,14 +899,14 @@ function drawGraph(simData, progress) {
   }
 
   // Axes
-  ctx.strokeStyle='#3A1A60';
+  ctx.strokeStyle = TC.axis;
   ctx.lineWidth=1.5*dpr;
   ctx.beginPath();
   ctx.moveTo(pd.l,pd.t);ctx.lineTo(pd.l,pd.t+ph);ctx.lineTo(pd.l+pw,pd.t+ph);
   ctx.stroke();
 
   // Y labels
-  ctx.fillStyle='#7060A0';
+  ctx.fillStyle = TC.muted;
   ctx.font=`${9*dpr}px Space Mono`;
   ctx.textAlign='right';
   for(let i=0;i<=4;i++){
@@ -832,16 +931,17 @@ function animateGraph(simData) {
   const DURATION = 1500; // мс — время полной развёртки
   const start = performance.now();
 
+  setSkipVisible(true); // показываем Skip во время анимации
   function frame(now) {
     const elapsed = now - start;
     const progress = Math.min(1, elapsed / DURATION);
-    // Easing: немного замедляем к концу для плавного завершения
     const eased = progress < 1 ? progress : 1;
     drawGraph(simData, eased);
     if (progress < 1) {
       _animFrame = requestAnimationFrame(frame);
     } else {
       _animFrame = null;
+      setSkipVisible(false); // прячем Skip когда готово
     }
   }
   _animFrame = requestAnimationFrame(frame);
@@ -1145,7 +1245,12 @@ function checkPIDWarnings() {
   // 6. Нелинейность — всегда полезное напоминание
   warns.push(['info', w['w-nonlin']]);
 
-  const colorMap = {
+  const isLight = document.body.classList.contains('light');
+  const colorMap = isLight ? {
+    error: { bg:'#D4C0BC', border:'#B08080', color:'#6A1020', hdr:'#900020' },
+    warn:  { bg:'#D4CCBC', border:'#B0A070', color:'#5A4010', hdr:'#804010' },
+    info:  { bg:'#BCCCD4', border:'#80A0B0', color:'#104050', hdr:'#105060' },
+  } : {
     error: { bg:'#180410', border:'#601030', color:'#E06080', hdr:'#FF4060' },
     warn:  { bg:'#181000', border:'#604010', color:'#C08040', hdr:'#E8A020' },
     info:  { bg:'#060C22', border:'#1A3060', color:'#60A0C0', hdr:'#40C0E0' },
@@ -1213,6 +1318,7 @@ const TR = {
     'btn-calc':'▶ CALCULATE',
     'btn-reset':'↺ Reset settings',
     'btn-clear':'⛔ Clear all',
+    'btn-skip':'⏭ Skip',
     'disclaimer':'⚠ Results based on ideal FOPDT model. Verify on real plant.',
     'kpi-kp-unit':'proportional','kpi-ki-unit':'integral','kpi-kd-unit':'derivative',
     'kpi-os':'Overshoot','kpi-ts':'Settling','kpi-ts-unit':'seconds (±5%)',
@@ -1243,6 +1349,7 @@ const TR = {
     'btn-calc':'▶ РАССЧИТАТЬ',
     'btn-reset':'↺ Сбросить',
     'btn-clear':'⛔ Очистить всё',
+    'btn-skip':'⏭ Пропустить',
     'disclaimer':'⚠ Расчёт по идеальной FOPDT модели. Проверяйте на реальном объекте.',
     'kpi-kp-unit':'пропорц.','kpi-ki-unit':'интеграл.','kpi-kd-unit':'дифферен.',
     'kpi-os':'Перерег.','kpi-ts':'Т-устан.','kpi-ts-unit':'секунд (±5%)',
@@ -1444,7 +1551,8 @@ function drawBode(K, T, L, Kp, Ki, Kd, progress) {
   const gh = (H - pd.t - pd.b - pd.mid) / 2; // height of each sub-plot
   const pw = W - pd.l - pd.r;
 
-  ctx.fillStyle = '#080514';
+  const TC = themeColors();
+  ctx.fillStyle = TC.bg;
   ctx.fillRect(0, 0, W, H);
 
   const N = bode.omega.length;
@@ -1459,7 +1567,7 @@ function drawBode(K, T, L, Kp, Ki, Kd, progress) {
   const toGY = g => gTop + (1 - (g - gMin) / gRange) * gh;
 
   // Grid gain
-  ctx.strokeStyle = '#1A0A2A'; ctx.lineWidth = 1;
+  ctx.strokeStyle = TC.grid; ctx.lineWidth = 1;
   [-40,-20,0,20,40].filter(g => g >= gMin && g <= gMax).forEach(g => {
     const y = toGY(g);
     ctx.beginPath(); ctx.moveTo(pd.l, y); ctx.lineTo(pd.l + pw, y); ctx.stroke();
@@ -1481,7 +1589,7 @@ function drawBode(K, T, L, Kp, Ki, Kd, progress) {
   ctx.stroke(); ctx.shadowBlur = 0;
 
   // Gain axis label
-  ctx.fillStyle = '#7060A0'; ctx.font = `${9*dpr}px Space Mono`; ctx.textAlign = 'right';
+  ctx.fillStyle = TC.muted; ctx.font = `${9*dpr}px Space Mono`; ctx.textAlign = 'right';
   [-40,-20,0,20,40].filter(g => g >= gMin && g <= gMax).forEach(g => {
     ctx.fillText(g+'dB', pd.l - 4*dpr, toGY(g) + 3*dpr);
   });
@@ -1493,7 +1601,7 @@ function drawBode(K, T, L, Kp, Ki, Kd, progress) {
   const phMin = -270, phMax = 0;
   const toPY = p => pTop + (1 - (p - phMin) / (phMax - phMin)) * gh;
 
-  ctx.strokeStyle = '#1A0A2A'; ctx.lineWidth = 1;
+  ctx.strokeStyle = TC.grid; ctx.lineWidth = 1;
   [-270,-180,-90,0].forEach(p => {
     const y = toPY(p);
     ctx.beginPath(); ctx.moveTo(pd.l, y); ctx.lineTo(pd.l + pw, y); ctx.stroke();
@@ -1515,7 +1623,7 @@ function drawBode(K, T, L, Kp, Ki, Kd, progress) {
   ctx.stroke(); ctx.shadowBlur = 0;
 
   // Phase axis label
-  ctx.fillStyle = '#7060A0'; ctx.font = `${9*dpr}px Space Mono`; ctx.textAlign = 'right';
+  ctx.fillStyle = TC.muted; ctx.font = `${9*dpr}px Space Mono`; ctx.textAlign = 'right';
   [-270,-180,-90,0].forEach(p => ctx.fillText(p+'°', pd.l-4*dpr, toPY(p)+3*dpr));
 
   // X axis labels (frequency)
@@ -1527,11 +1635,11 @@ function drawBode(K, T, L, Kp, Ki, Kd, progress) {
     const x = toX(w);
     ctx.fillText(w < 0.1 ? w.toFixed(3) : w < 10 ? w.toFixed(2) : w.toFixed(0), x, pTop + gh + 18*dpr);
   }
-  ctx.fillStyle = '#7060A0';
+  ctx.fillStyle = TC.muted;
   ctx.fillText('ω (rad/s)', pd.l + pw/2, pTop + gh + 28*dpr);
 
   // Axes lines
-  ctx.strokeStyle = '#3A1A60'; ctx.lineWidth = 1.5*dpr;
+  ctx.strokeStyle = TC.axis; ctx.lineWidth = 1.5*dpr;
   ctx.beginPath();
   ctx.moveTo(pd.l, gTop); ctx.lineTo(pd.l, gTop+gh); ctx.lineTo(pd.l+pw, gTop+gh); ctx.stroke();
   ctx.beginPath();
@@ -1711,6 +1819,13 @@ function importJSON() {
 
 // ── INIT ──────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
+  // Восстанавливаем тему
+  if (localStorage.getItem('pid_theme') === 'light') {
+    document.body.classList.add('light');
+    const tb = document.getElementById('theme-toggle');
+    if (tb) tb.textContent = '☀️';
+  }
+  restoreCollapse();
   loadLS();
   loadFromURL();
   applyLang(); // применяем язык из сохранённых настроек

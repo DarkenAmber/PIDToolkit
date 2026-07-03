@@ -1,174 +1,119 @@
 # PID Toolkit
 
 **Browser-based PID controller tuning tool.**  
-One HTML file — works offline, with no dependencies and no backend.
-
-🌐 **Live Demo:** [PID Toolkit](https://darkenamber.github.io/PIDToolkit/)
-
-📂 **GitHub:** [DarkenAmber/PIDToolkit](https://github.com/DarkenAmber/PIDToolkit)
+One HTML file — offline, no dependencies, no backend.
 
 ![DarkenAmber](https://img.shields.io/badge/style-DarkenAmber-E8A020)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-1.0-blue)
+![Version](https://img.shields.io/badge/version-1.1-blue)
 
 ---
 
-# What it does
+## What it does
 
-Enter your plant model (**K**, **T**, **L**) and PID Toolkit instantly provides:
+Enter your plant model (K, T, L) and get:
 
-- PID coefficients calculated using multiple tuning methods
-- Animated step response simulation
-- Animated Bode plot with Phase Margin and Gain Margin
-- Side-by-side comparison of all tuning methods
-- Ready-to-use controller code generation
-- Engineering warnings about delay, noise and saturation
+- **PID coefficients** — 6 tuning methods calculated simultaneously
+- **Step response** — animated oscilloscope-style graph with live update
+- **Bode Plot** — gain and phase margins, animated
+- **Method comparison table** — all 6 methods side by side, sortable
+- **Code export** — ready-to-paste code for 4 platforms
+- **Contextual warnings** — real-world advice about noise, delay, and saturation
 
 ---
 
-# Supported tuning methods
+## Tuning methods
 
 | Method | Type | Input |
 |--------|------|-------|
-| Ziegler–Nichols (Open Loop) | Classic | K, T, L |
-| Ziegler–Nichols (Closed Loop) | Ultimate Gain | Ku, Tu |
-| CHR (0% Overshoot) | Conservative | K, T, L |
-| CHR (20% Overshoot) | Moderate | K, T, L |
-| ITAE Servo | Servo optimization | K, T, L |
-| ITAE Regulator | Disturbance rejection | K, T, L |
+| Ziegler-Nichols OL | Classic | K, T, L |
+| Ziegler-Nichols CL | Ultimate gain | Ku, Tu |
+| CHR 0% overshoot | Conservative | K, T, L |
+| CHR 20% overshoot | Moderate | K, T, L |
+| ITAE | Optimal integral criterion | K, T, L |
 | Lambda / IMC | Model-based | K, T, L + λ |
 
 ---
 
-# Code generation
+## Code export
 
-Generated implementations include:
+All platforms include **D on measurement** (no derivative kick) and **conditional anti-windup**:
 
-- **D on Measurement** (eliminates derivative kick)
-- **Conditional Anti-Windup**
-- Optional derivative filtering
-
-Supported platforms:
-
-- Arduino
-- ESP32 + FreeRTOS
-- MicroPython
-- IEC 61131-3 Structured Text (Siemens, CODESYS, Schneider, Beckhoff)
+- **Arduino** — `computePID()` with optional D-filter
+- **ESP32 + FreeRTOS** — `pidTask()` with `vTaskDelay`
+- **MicroPython** — `class PID` with `compute(pv)`
+- **IEC 61131-3 ST** — Siemens, CODESYS, Schneider, Beckhoff
 
 ---
 
-# Quick presets
+## Quick presets
 
 | Preset | K | T | L |
 |--------|---|---|---|
-| 🌡 Temperature | 0.8 | 120 s | 15 s |
-| ⚡ Pressure | 1.2 | 5 s | 0.5 s |
-| 💧 Level | 1.0 | 30 s | 3 s |
-| ⚙ DC Motor Speed | 2.0 | 0.5 s | 0.05 s |
-| ⚙ DC Motor Position | 1.0 | 0.8 s | 0.1 s |
-| ⚙ Servo | 1.5 | 0.2 s | 0.02 s |
-| ⚙ Conveyor / Geared Motor | 0.5 | 2.0 s | 0.3 s |
+| 🌡 Temperature | 0.8 | 120s | 15s |
+| ⚡ Pressure | 1.2 | 5s | 0.5s |
+| 💧 Level | 1.0 | 30s | 3s |
+| ⚙ DC Motor Speed | 2.0 | 0.5s | 0.05s |
+| ⚙ DC Motor Position | 1.0 | 0.8s | 0.1s |
+| ⚙ Servo | 1.5 | 0.2s | 0.02s |
+| ⚙ Conveyor/Geared | 0.5 | 2.0s | 0.3s |
 
 ---
 
-# Features
+## Features
 
-- Animated oscilloscope-style step response
-- Animated Bode plot
-- Automatic parameter recalculation
-- Sortable comparison table
-- Phase Margin and Gain Margin calculation
-- First-order derivative filter
-- Conditional anti-windup
-- URL hash sharing
+- Oscilloscope-style animated step response
+- Animated Bode Plot with Phase Margin and Gain Margin
+- Live parameter update — graph and code update automatically (400ms debounce)
+- ⏭ Skip animation button
+- Method comparison table — sortable by Kp / Ki / Kd / Overshoot
+- Collapsible sections — Method Comparison and Code Export
+- D-term filter (first-order, Tf = Kd / (Kp × N))
+- Output limits with conditional anti-windup
+- Contextual warnings (noise, large delay, Z-N aggressiveness, nonlinearity)
+- 🌙 Dark / ☀️ Light theme toggle
+- URL hash sharing — send parameters in one link
+- EN / RU language switch — full UI translation
+- Reset settings / Clear all localStorage
 - Import / Export JSON
-- PDF-friendly print layout
-- EN / RU interface
-- Fully offline operation
+- PDF / Print layout
+- Fully offline
 
 ---
 
-# Usage
+## Usage
 
-1. Download **pid-toolkit.html**
-2. Open it in any modern browser.
-3. Enter **K**, **T** and **L**, or choose a preset.
-4. Compare tuning methods.
-5. Analyze the response.
-6. Export controller code for your platform.
+1. Download `index.html`
+2. Open in any browser
+3. Enter K, T, L or pick a preset
+4. Press **Calculate**
+5. Copy the generated code for your platform
 
 ---
 
-# Target audience
+## Target audience
 
-- Arduino developers
-- ESP32 developers
-- PLC programmers
-- Control engineers
+- Arduino / ESP32 developers
+- Process control engineers (SCADA, IEC ST)
 - Automation students
-- Anyone who needs quick PID tuning without installing MATLAB or similar software
+- Anyone who needs PID coefficients fast without MATLAB
 
 ---
 
-# Architecture
+## Architecture
 
-Designed as a **single HTML file**.
-
-No installation.
-
-No build step.
-
-No npm.
-
-No framework.
-
-No backend.
-
-Core execution flow:
-
-```
-calcAll()
-    ↓
-simulate()
-    ↓
-metrics()
-    ↓
-renderCompTable()
-    ↓
-genCode()
-```
+Single HTML file — intentionally. No build step, no npm, no CDN.  
+All logic in vanilla JS: `calcAll()` → `simulate()` → `metrics()` → `renderCompTable()` → `genCode()`.
 
 ---
 
-# Roadmap
+## License
 
-Planned features:
-
-- Learn Mode (step-by-step calculations)
-- Auto Tuning Wizard
-- Nichols Chart
-- Monte Carlo Robustness
-- Additional tuning methods
-- More export targets
+MIT — use freely, attribution appreciated.
 
 ---
 
-# License
+## Author
 
-MIT License.
-
-Free to use, modify and distribute.
-
----
-
-# Author
-
-**DarkenAmber**
-
-GitHub: https://github.com/DarkenAmber
-
-If you find this project useful, consider supporting its development:
-
-☕ Ko-fi: https://ko-fi.com/darkenamber
-
-❤️ Patreon: https://www.patreon.com/cw/DarkenAmber
+[DarkenAmber](https://github.com/DarkenAmber)  
+Support the project: [Ko-fi](https://ko-fi.com/darkenamber) · [Patreon](https://www.patreon.com/cw/DarkenAmber)

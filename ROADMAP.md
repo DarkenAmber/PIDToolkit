@@ -1,8 +1,16 @@
 # Roadmap
 
+## v1.1 — Released ✅
+
+UI improvements based on community feedback:
+light/dark theme, collapsible sections, Skip animation, 7 presets, contextual warnings, full EN/RU translation.  
+See [CHANGELOG.md](CHANGELOG.md) for full details.
+
+---
+
 ## v1.0 — Released ✅
 
-Core tuning engine, 6 methods, animated graphs, 4-platform code export, EN/RU, presets, contextual warnings.  
+Core tuning engine, 6 methods, animated graphs, 4-platform code export.  
 See [CHANGELOG.md](CHANGELOG.md) for full details.
 
 ---
@@ -36,12 +44,11 @@ Why: large dead time (L/T = 0.6), Z-N will overshoot heavily
 
 ### 3. Nichols Chart
 Completes the frequency-domain trio alongside Bode Plot.  
-Analytical calculation from the same open-loop transfer function — no extra plant data needed.
+Analytical calculation from the same open-loop transfer function.
 
 ### 4. Monte Carlo Robustness
 Run N simulations with randomized plant parameters (K ±20%, T ±15%, L ±10%).  
-Display the envelope of possible responses on the step response graph.  
-Shows how robust the tuning is to real-world plant variation.
+Display the envelope of possible responses on the step response graph.
 
 ---
 
@@ -49,7 +56,7 @@ Shows how robust the tuning is to real-world plant variation.
 
 - Feed Forward term
 - Cascade PID (inner + outer loop)
-- Relay Auto-Tuning (find Ku/Tu automatically from relay experiment)
+- Relay Auto-Tuning (find Ku/Tu from relay experiment)
 - Gain Scheduling
 - SOPDT plant model (second order)
 - CSV import → identify K/T/L from step experiment data
@@ -60,17 +67,8 @@ Shows how robust the tuning is to real-world plant variation.
 
 ---
 
-## Community ideas
-
-Suggestions from engineers after v1.0 launch:
-- SVG export (in addition to PNG)
-- Structured PDF report (plant + method + graph + code in one document)
-- MATLAB / Simulink comparison mode
-
----
-
 ## Not planned
 
-- SaaS / cloud version — single-file offline architecture is a core constraint, not a limitation
+- SaaS / cloud version — single-file offline architecture is a core design decision
 - Mobile app — Android considered, iOS not currently possible
 - Backend / API — intentionally no server dependency
