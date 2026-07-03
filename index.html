@@ -574,8 +574,15 @@ function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
   document.getElementById('theme-toggle').textContent = isLight ? '☀️' : '🌙';
   localStorage.setItem('pid_theme', isLight ? 'light' : 'dark');
+  // Перерисовываем граф при любом состоянии — иначе canvas остаётся тёмным
   if (S.simData) drawGraph(S.simData, 1);
-  if (S.results) checkPIDWarnings(); // цвета предупреждений меняются
+  else drawGraph(null);
+  // Bode если активна вкладка
+  const r = S.results ? S.results[S.method] : null;
+  if (r && document.getElementById('view-bode')?.style.display !== 'none') {
+    drawBode(S.K, S.T, S.L, r.Kp, r.Ki, r.Kd, 1);
+  }
+  if (S.results) checkPIDWarnings();
 }
 
 function skipAnim() {
@@ -1819,7 +1826,7 @@ function importJSON() {
 
 // ── INIT ──────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  // Восстанавливаем тему
+  // Сначала восстанавливаем тему — до drawGraph(null)
   if (localStorage.getItem('pid_theme') === 'light') {
     document.body.classList.add('light');
     const tb = document.getElementById('theme-toggle');
@@ -1828,8 +1835,8 @@ window.addEventListener('load', () => {
   restoreCollapse();
   loadLS();
   loadFromURL();
-  applyLang(); // применяем язык из сохранённых настроек
-  drawGraph(null);
+  applyLang();
+  drawGraph(null); // теперь рисует с правильной темой
   let resizeTimer;
   new ResizeObserver(() => {
     clearTimeout(resizeTimer);
