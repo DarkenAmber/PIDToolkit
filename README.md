@@ -7,7 +7,7 @@ One HTML file — offline, no dependencies, no backend.
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Version](https://img.shields.io/badge/version-1.1-blue)
 
-https://darkenamber.github.io/PIDToolkit/
+[![Live Demo](https://img.shields.io/badge/demo-live-E8A020?style=flat)](https://darkenamber.github.io/PIDToolkit/)
 
 ---
 
